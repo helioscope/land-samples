@@ -3,6 +3,10 @@ export function randomRange(min, max) {
   return (Math.random() * range) + min;
 }
 
+export function randomRangeFromArray(arr) {
+  return randomRange(arr[0],arr[1]);
+}
+
 // const map = (val, smin, smax, emin, emax) => {
 //   // map(
 //   //   Math.random(),

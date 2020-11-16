@@ -1,7 +1,7 @@
 import _ from 'lodash';
 import * as THREE from 'three';
 
-import {randomRange, jitterVertices} from './util';
+import {randomRange, randomRangeFromArray, jitterVertices} from './util';
 
 const defaultTierWidths = [1.4, 2, 2.6];
 const defaultTierYOffsets = [2.2, 1.1, 0];
@@ -24,14 +24,14 @@ export function makeLollipopTree() {
   jitterVertices(leafball, 0.1);
   geometry.merge(leafball);
 
-  const trunkWidth = randomRange(trunkWidthRange[0], trunkWidthRange[1]);
+  const trunkWidth = randomRangeFromArray(trunkWidthRange);
   const trunk = new THREE.CylinderGeometry(trunkWidth, trunkWidth, 6, 5);
   trunk.translate(0,0,0);
   trunk.rotateY(randomRange(0, 1));
   trunk.faces.forEach(f => f.color.set(0x604011));
   geometry.merge(trunk);
 
-  const randomScale = randomRange(finalScaleRange[0],finalScaleRange[1]);
+  const randomScale = randomRangeFromArray(finalScaleRange);
   geometry.scale(randomScale, randomScale, randomScale);
 
   return new THREE.Mesh(
@@ -43,14 +43,14 @@ export function makeLollipopTree() {
 export function makeConiferTree() {
   // const group = new THREE.Group();
   const geometry = new THREE.Geometry();
-  const leafWidthScale = randomRange(widthScaleRange[0], widthScaleRange[1]);
-  const leafBottom = randomRange(leafBottomOffsetRange[0], leafBottomOffsetRange[1]);
+  const leafWidthScale = randomRangeFromArray(widthScaleRange);
+  const leafBottom = randomRangeFromArray(leafBottomOffsetRange);
 
   _.each(defaultTierWidths, (width, index) => {
-    const tierWidth = (width * leafWidthScale) + randomRange(tierScaleOffsetVariation[0], tierScaleOffsetVariation[1]);
+    const tierWidth = (width * leafWidthScale) + randomRangeFromArray(tierScaleOffsetVariation);
     const tierHeight = 2;
     const radialSegments = 5;
-    const tierY = leafBottom + defaultTierYOffsets[index] + randomRange(tierYOffsetVariation[0], tierYOffsetVariation[1]);
+    const tierY = leafBottom + defaultTierYOffsets[index] + randomRangeFromArray(tierYOffsetVariation);
     
     const leafTier = new THREE.ConeGeometry(tierWidth, tierHeight, radialSegments)
     leafTier.translate(0, tierY, 0);
@@ -67,17 +67,17 @@ export function makeConiferTree() {
     // group.add(leafTier);
   });
 
-  const trunkWidth = randomRange(trunkWidthRange[0], trunkWidthRange[1]);
+  const trunkWidth = randomRangeFromArray(trunkWidthRange);
   const trunk = new THREE.CylinderGeometry(trunkWidth, trunkWidth, 2, 5);
   trunk.translate(0,0,0);
   trunk.rotateY(randomRange(0, 1));
   trunk.faces.forEach(f => f.color.set(0x604011));
   geometry.merge(trunk);
 
-  const randomScale = randomRange(finalScaleRange[0],finalScaleRange[1]);
+  const randomScale = randomRangeFromArray(finalScaleRange);
   geometry.scale(randomScale, randomScale, randomScale);
-  geometry.rotateZ(randomRange(tiltRange[0],tiltRange[1]));
-  geometry.rotateX(randomRange(tiltRange[0],tiltRange[1]));
+  geometry.rotateZ(randomRangeFromArray(tiltRange));
+  geometry.rotateX(randomRangeFromArray(tiltRange));
 
   // const performantGeometry = new BufferGeometry();
   // performantGeometry.fromGeometry(geometry);
