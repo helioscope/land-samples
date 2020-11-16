@@ -10,7 +10,7 @@ let clock = null;
 
 let dioramaGroup = null;
 
-const DEFAULT_SPIN_RATE = (Math.PI/90);
+const DEFAULT_SPIN_RATE = (Math.PI/90) * 10;
 
 function init() {
   rootElem = document.getElementById('app-root');

@@ -40,16 +40,18 @@ export function prepLighting(renderer) {
     light.shadow.camera.far = 800; // default: 500
   }
 
-  light.position.y = 10;
+  light.position.y = 20;
   light.target.position.z = 4;
+  light.target.position.y = 0;
+
   dioramaGroup.add(light);
   dioramaGroup.add(light.target);
 }
 
 export function generateDiorama() {
   createGround();
-  createTrees();
-  createClouds();
+  // createTrees();
+  // createClouds();
 
   return dioramaGroup;
 }
@@ -88,7 +90,7 @@ function createGround() {
 };
 
 function createTrees() {
-  spawnInGrid(trees, dioramaGroup, makeConiferTree, NUM_TREES, 4.5);
+  spawnInGrid(trees, dioramaGroup, makeLollipopTree, NUM_TREES, 4.5);
 }
 
 function createClouds() {

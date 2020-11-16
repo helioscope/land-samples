@@ -7,16 +7,13 @@ export function randomRangeFromArray(arr) {
   return randomRange(arr[0],arr[1]);
 }
 
-// const map = (val, smin, smax, emin, emax) => {
-//   // map(
-//   //   Math.random(),
-//   //   0,1,
-//   //   -0.2,0.2
-//   // )
-//   erange = (emax-emin) // .02 - -.02 (.04)
-//   srange = (smax-smin) // 1-0 (1)
-//   return erange * (val-smin)/srange + emin
-// }
+export function remapValue(value, inMin, inMax, outMin, outMax) {
+  // remap value from its initial range ("in" min and max) to a new range ("out" min & max)
+  const inRange = inMax - inMin;
+  const outRange = outMax - outMin
+  return outRange * ((value - inMin) / inRange) + outMin;
+}
+
 //randomly displace the x,y,z coords by the `per` value
 export function jitterVertices(geometry, maxDistance){
   _.each(geometry.vertices, (v) => {
