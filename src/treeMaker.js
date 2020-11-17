@@ -3,6 +3,8 @@ import * as THREE from 'three';
 
 import {randomRange, randomRangeFromArray, jitterVertices} from './util';
 
+const USE_HARD_EDGE_LOWPOLY_STYLE = false;
+
 const defaultTierWidths = [1.4, 2, 2.6];
 const defaultTierYOffsets = [2.2, 1.1, 0];
 const widthScaleRange = [0.5, 1.0];
@@ -11,7 +13,7 @@ const leafBottomOffsetRange = [1.25, 2];
 const tierScaleOffsetVariation = [-0.125, 0.125];
 const trunkWidthRange = [0.2, 0.35];
 const finalScaleRange = [0.5, 1.05];
-const treeMaterial = new THREE.MeshLambertMaterial({vertexColors: THREE.VertexColors});
+const treeMaterial = new THREE.MeshLambertMaterial({vertexColors: THREE.VertexColors, flatShading: USE_HARD_EDGE_LOWPOLY_STYLE});
 const tiltRange = [-0.04,0.04];
 
 export function makeLollipopTree() {
@@ -34,6 +36,11 @@ export function makeLollipopTree() {
 
   const randomScale = randomRangeFromArray(finalScaleRange);
   geometry.scale(randomScale, randomScale, randomScale);
+
+  if (USE_HARD_EDGE_LOWPOLY_STYLE) {
+    geometry.verticesNeedUpdate = true;
+    geometry.computeFlatVertexNormals();
+  }
 
   return new THREE.Mesh(
     geometry,
@@ -79,6 +86,11 @@ export function makeConiferTree() {
   geometry.scale(randomScale, randomScale, randomScale);
   geometry.rotateZ(randomRangeFromArray(tiltRange));
   geometry.rotateX(randomRangeFromArray(tiltRange));
+
+  if (USE_HARD_EDGE_LOWPOLY_STYLE) {
+    geometry.verticesNeedUpdate = true;
+    geometry.computeFlatVertexNormals();
+  }
 
   // const performantGeometry = new BufferGeometry();
   // performantGeometry.fromGeometry(geometry);

@@ -3,10 +3,11 @@ import * as THREE from 'three';
 
 import {jitterVertices, mushBottom, randomRange, randomRangeFromArray} from './util';
 
+const USE_HARD_EDGE_LOWPOLY_STYLE = false;
 const cloudMaterial = new THREE.MeshLambertMaterial({
   color: 0xFFFFFF,
   emissive: 0x333333,
-  // flatShading: true,
+  flatShading: USE_HARD_EDGE_LOWPOLY_STYLE,
 });
 
 const tuftRadii = [1.5, 1.5, 2.0];
@@ -34,6 +35,11 @@ export function makeCumulousCloud() {
 
   const finalScale = randomRangeFromArray(finalScaleRange);
   geometry.scale(finalScale, finalScale, finalScale);
+
+  if (USE_HARD_EDGE_LOWPOLY_STYLE) {
+    geometry.verticesNeedUpdate = true;
+    geometry.computeFlatVertexNormals();
+  }
 
   return new THREE.Mesh(
     geometry,

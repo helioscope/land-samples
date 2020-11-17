@@ -31,7 +31,7 @@ function init() {
   dioramaGroup = generateDiorama();
 
   camera.position.z = 20;
-  camera.position.y = 6;
+  camera.position.y = 12;
   
   animate();
 

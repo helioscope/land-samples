@@ -94,7 +94,7 @@ function createGround() {
 };
 
 function createTrees() {
-  spawnInGrid(trees, treesGroup, makeLollipopTree, NUM_TREES, 4.5, (tree) => {
+  spawnInGrid(trees, treesGroup, makeConiferTree, NUM_TREES, 4.5, (tree) => {
     tree.position.y = getHeightAt(tree.position.x, tree.position.z);
   });
 }

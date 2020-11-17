@@ -11,6 +11,7 @@ const heightmapCanvas = document.createElement('canvas');
 const heightmapContext = heightmapCanvas.getContext('2d');
 
 const NOISE_OCTAVES = 16;
+const USE_HARD_EDGE_LOWPOLY_STYLE = false;
 
 
 function sampleNoise(x, y) {
@@ -67,11 +68,17 @@ function getColorForHeight(height) {
   } else if (height < 0) {
     return heightColors[0];
   } else {
+    // this is pretty inefficient.
+    // minor improvement: could define colors as THREE.Color above.
+    // alternatively: could pre-define a color gradient in a canvas context, save the image, assign the height range,
+    //   then just pull the pixel for that height.
     let floor = Math.floor(height);
-    // let remainder = height - floor;
-    // todo: interpolate color
-    // alternatively could define gradient in a canvas context, save the image, and just pull the pixels
-    return heightColors[floor];
+    let ceiling = Math.ceil(height);
+    let remainder = height - floor;
+    let colorBelow = new THREE.Color(heightColors[floor]);
+    let colorAbove = new THREE.Color(heightColors[ceiling]);
+    
+    return colorBelow.lerp(colorAbove, remainder);
   }
 }
 
@@ -102,6 +109,7 @@ export function makeGroundPlane(width, height, seed=undefined) {
     }
   }
 
+  // coloring by face has a fun lo-fi retro-blend look, but it's not consistent with our approach otherwise
   _.each(geometry.faces, (face) => {
     //get three verts for the face
     const vertA = geometry.vertices[face.a];
@@ -115,10 +123,14 @@ export function makeGroundPlane(width, height, seed=undefined) {
   });
 
   geometry.rotateX(Math.PI/-2);
-  // geometry.rotateY(Math.PI);
+  
   geometry.verticesNeedUpdate = true;
-  // geometry.computeFlatVertexNormals(); // for flat shading, in common 'lowpoly' style
-  geometry.computeVertexNormals();
+
+  if (USE_HARD_EDGE_LOWPOLY_STYLE) {
+    geometry.computeFlatVertexNormals();
+  } else {
+    geometry.computeVertexNormals();
+  }
   
   return new THREE.Mesh(
     geometry,
@@ -126,7 +138,7 @@ export function makeGroundPlane(width, height, seed=undefined) {
       // color: 0x004511,
       vertexColors: THREE.VertexColors,
       // wireframe: true,
-      // flatShading: true,
+      flatShading: USE_HARD_EDGE_LOWPOLY_STYLE,
     })
   );
 }
