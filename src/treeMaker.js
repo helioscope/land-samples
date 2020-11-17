@@ -25,8 +25,9 @@ export function makeLollipopTree() {
   geometry.merge(leafball);
 
   const trunkWidth = randomRangeFromArray(trunkWidthRange);
-  const trunk = new THREE.CylinderGeometry(trunkWidth, trunkWidth, 6, 5);
-  trunk.translate(0,0,0);
+  const trunkHeight = 3;
+  const trunk = new THREE.CylinderGeometry(trunkWidth, trunkWidth, trunkHeight, 5);
+  trunk.translate(0, trunkHeight * 0.5, 0);
   trunk.rotateY(randomRange(0, 1));
   trunk.faces.forEach(f => f.color.set(0x604011));
   geometry.merge(trunk);

@@ -2,7 +2,7 @@ import * as THREE from 'three';
 
 import {makeConiferTree, makeLollipopTree} from './treeMaker';
 import {makeCumulousCloud} from './cloudMaker';
-import { makeGroundPlane } from './groundMaker';
+import { makeGroundPlane, getHeightAt } from './groundMaker';
 
 
 let light = null;
@@ -10,6 +10,7 @@ let trees = [];
 let clouds = [];
 let ground = null;
 let dioramaGroup = null;
+let treesGroup = null;
 
 const NUM_TREES = 10; // stress test 70x70 hits ~30fps with each tree as separate geometry; switching to buffer geometry raises to ~40fps
 const NUM_CLOUDS = 5;
@@ -18,6 +19,9 @@ const ENABLE_SHADOWS = false;
 export function initDiorama(scene, renderer) {
   dioramaGroup = new THREE.Group();
   scene.add(dioramaGroup);
+
+  treesGroup = new THREE.Group();
+  dioramaGroup.add(treesGroup);
 
   renderer.domElement.style.backgroundColor = "#6688FF";
 
@@ -50,8 +54,8 @@ export function prepLighting(renderer) {
 
 export function generateDiorama() {
   createGround();
-  // createTrees();
-  // createClouds();
+  createTrees();
+  createClouds();
 
   return dioramaGroup;
 }
@@ -82,7 +86,7 @@ function createGround() {
   if (ground) {
     dioramaGroup.remove(ground);
   }
-  ground = makeGroundPlane(NUM_TREES * 5, NUM_TREES * 5);
+  ground = makeGroundPlane(NUM_TREES * 4.5, NUM_TREES * 4.5, Math.random());
   dioramaGroup.add(ground);
   if (ENABLE_SHADOWS) {
     ground.receiveShadow = true;
@@ -90,7 +94,9 @@ function createGround() {
 };
 
 function createTrees() {
-  spawnInGrid(trees, dioramaGroup, makeLollipopTree, NUM_TREES, 4.5);
+  spawnInGrid(trees, treesGroup, makeLollipopTree, NUM_TREES, 4.5, (tree) => {
+    tree.position.y = getHeightAt(tree.position.x, tree.position.z);
+  });
 }
 
 function createClouds() {

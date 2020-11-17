@@ -4,15 +4,14 @@ import SimplexNoise from 'simplex-noise';
 
 import {randomRange, remapValue} from './util';
 
+
 let noiseSeed = new Date().toString();
 let simplex = new SimplexNoise(noiseSeed);
 const heightmapCanvas = document.createElement('canvas');
+const heightmapContext = heightmapCanvas.getContext('2d');
 
 const NOISE_OCTAVES = 16;
 
-function init() {
-  
-}
 
 function sampleNoise(x, y) {
   return remapValue(simplex.noise2D(x, y), -1,1, 0,1);
@@ -33,7 +32,7 @@ function sampleOctavedNoise(x, y, octaveCount) {
 }
 
 function generateTexture(width, height) {
-  const c = heightmapCanvas.getContext('2d');
+  const c = heightmapContext;
   
   heightmapCanvas.width = width;
   heightmapCanvas.height = height;
@@ -52,8 +51,33 @@ function generateTexture(width, height) {
   return c.getImageData(0,0,width,height);
 }
 
+const heightColors = [
+  0x002911,
+  0x003911,
+  0x004511,
+  0x004911,
+  0x005212,
+  0x006014,
+  0x007720,
+]; // each entry's index is its y-position
+
+function getColorForHeight(height) {
+  if (height > heightColors.length) {
+    return heightColors[heightColors.length];
+  } else if (height < 0) {
+    return heightColors[0];
+  } else {
+    let floor = Math.floor(height);
+    // let remainder = height - floor;
+    // todo: interpolate color
+    // alternatively could define gradient in a canvas context, save the image, and just pull the pixels
+    return heightColors[floor];
+  }
+}
+
 export function makeGroundPlane(width, height, seed=undefined) {
-  const geometry = new THREE.PlaneGeometry(width, height, width, height+1);
+  console.log('generating plane:', width, height);
+  const geometry = new THREE.PlaneGeometry(width, height, width, height);
 
   if (seed !== undefined) {
     noiseSeed = seed;
@@ -61,6 +85,7 @@ export function makeGroundPlane(width, height, seed=undefined) {
   }
 
   const texture = generateTexture(width, height);
+  console.log('texture dimensions:', width)
   for(let ty = 0; ty < texture.height; ty++) {
     for (let tx = 0; tx < texture.width; tx++) {
         const vertIndex = (ty * (texture.height) + tx);
@@ -77,7 +102,20 @@ export function makeGroundPlane(width, height, seed=undefined) {
     }
   }
 
+  _.each(geometry.faces, (face) => {
+    //get three verts for the face
+    const vertA = geometry.vertices[face.a];
+    const vertB = geometry.vertices[face.b];
+    const vertC = geometry.vertices[face.c];
+
+    //assign colors based on the highest point of the face
+    const max = Math.max(vertA.z ,Math.max(vertB.z, vertC.z));
+
+    face.color.set(getColorForHeight(max));
+  });
+
   geometry.rotateX(Math.PI/-2);
+  // geometry.rotateY(Math.PI);
   geometry.verticesNeedUpdate = true;
   // geometry.computeFlatVertexNormals(); // for flat shading, in common 'lowpoly' style
   geometry.computeVertexNormals();
@@ -85,9 +123,15 @@ export function makeGroundPlane(width, height, seed=undefined) {
   return new THREE.Mesh(
     geometry,
     new THREE.MeshLambertMaterial({
-      color: 0x004511,
-      // vertexColors: THREE.VertexColors,
+      // color: 0x004511,
+      vertexColors: THREE.VertexColors,
+      // wireframe: true,
       // flatShading: true,
     })
   );
+}
+
+export function getHeightAt(x, y) {
+  let valueAtPosition = heightmapContext.getImageData(x+heightmapCanvas.width*0.5, y+heightmapCanvas.height*0.5, 1,1).data[2];
+  return remapValue(valueAtPosition, 0,255, 0,7);
 }
