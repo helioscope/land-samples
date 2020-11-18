@@ -109,18 +109,31 @@ export function makeGroundPlane(width, height, seed=undefined) {
     }
   }
 
-  // coloring by face has a fun lo-fi retro-blend look, but it's not consistent with our approach otherwise
-  _.each(geometry.faces, (face) => {
-    //get three verts for the face
-    const vertA = geometry.vertices[face.a];
-    const vertB = geometry.vertices[face.b];
-    const vertC = geometry.vertices[face.c];
+  if (USE_HARD_EDGE_LOWPOLY_STYLE) {
+    // coloring by face has a fun lo-fi retro-blend look
+    _.each(geometry.faces, (face) => {
+      const vertA = geometry.vertices[face.a];
+      const vertB = geometry.vertices[face.b];
+      const vertC = geometry.vertices[face.c];
 
-    //assign colors based on the highest point of the face
-    const max = Math.max(vertA.z ,Math.max(vertB.z, vertC.z));
+      const maxHeight = Math.max(vertA.z ,Math.max(vertB.z, vertC.z));
 
-    face.color.set(getColorForHeight(max));
-  });
+      face.color.set(getColorForHeight(maxHeight));
+    });
+  } else {
+    // coloring per vertex is much smoother (and potentially more "blurry"-looking)
+    _.each(geometry.faces, (face) => {
+      const vertA = geometry.vertices[face.a];
+      const vertB = geometry.vertices[face.b];
+      const vertC = geometry.vertices[face.c];
+
+      face.vertexColors = [
+        getColorForHeight(vertA.z),
+        getColorForHeight(vertB.z),
+        getColorForHeight(vertC.z)
+      ];
+    });
+  }
 
   geometry.rotateX(Math.PI/-2);
   
