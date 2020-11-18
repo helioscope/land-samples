@@ -3,6 +3,7 @@ import * as THREE from 'three';
 import {makeConiferTree, makeLollipopTree} from './treeMaker';
 import {makeCumulousCloud} from './cloudMaker';
 import { makeGroundPlane, getHeightAt } from './groundMaker';
+import {randomOdds, randomRange, randomRangeFromArray} from './util';
 
 
 let light = null;
@@ -14,6 +15,8 @@ let dioramaGroup = null;
 let treesGroup = null;
 
 const NUM_TREES = 10; // stress test 70x70 hits ~30fps with each tree as separate geometry; switching to buffer geometry raises to ~40fps
+const treeSpawnOddsRange = [0.3, 0.95];
+const cloudSpawnOddsRange = [0.3, 1];
 const NUM_CLOUDS = 5;
 const ENABLE_SHADOWS = false;
 
@@ -114,7 +117,12 @@ function createWater() {
 }
 
 function createTrees() {
+  const removalOdds = 1 - randomRangeFromArray(treeSpawnOddsRange);
   spawnInGrid(trees, treesGroup, makeConiferTree, NUM_TREES, 4.5, (tree) => {
+    if (randomOdds(removalOdds)) {
+      treesGroup.remove(tree);
+      return;
+    }
     let yPos = getHeightAt(tree.position.x, tree.position.z);
     if (yPos > water.position.y) {
       tree.position.y = yPos;
@@ -125,7 +133,12 @@ function createTrees() {
 }
 
 function createClouds() {
+  const removalOdds = 1 - randomRangeFromArray(cloudSpawnOddsRange);
   spawnInGrid(clouds, dioramaGroup, makeCumulousCloud, NUM_CLOUDS, 14, (cloud) => {
+    if (randomOdds(removalOdds)) {
+      dioramaGroup.remove(cloud);
+      return;
+    }
     cloud.position.y = 20;
   });
 }

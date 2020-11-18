@@ -1,3 +1,7 @@
+export function randomOdds(chance) { // assumes chance is between 0 and 1
+  return Math.random() <= chance;
+}
+
 export function randomRange(min, max) {
   const range = max - min;
   return (Math.random() * range) + min;
