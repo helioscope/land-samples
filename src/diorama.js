@@ -9,6 +9,7 @@ let light = null;
 let trees = [];
 let clouds = [];
 let ground = null;
+let water = null;
 let dioramaGroup = null;
 let treesGroup = null;
 
@@ -54,6 +55,7 @@ export function prepLighting(renderer) {
 
 export function generateDiorama() {
   createGround();
+  createWater();
   createTrees();
   createClouds();
 
@@ -93,9 +95,32 @@ function createGround() {
   }
 };
 
+function createWater() {
+  if (water) {
+    dioramaGroup.remove(water);
+  }
+  const planeGeometry = new THREE.PlaneGeometry(NUM_TREES * 4.5, NUM_TREES * 4.5);
+  planeGeometry.rotateX(-Math.PI/2);
+  water = new THREE.Mesh(
+    planeGeometry,
+    new THREE.MeshLambertMaterial({
+      color: 0x182090,
+      transparent: true,
+      opacity: 0.8
+    })
+  );
+  water.position.y = 1;
+  dioramaGroup.add(water);
+}
+
 function createTrees() {
   spawnInGrid(trees, treesGroup, makeConiferTree, NUM_TREES, 4.5, (tree) => {
-    tree.position.y = getHeightAt(tree.position.x, tree.position.z);
+    let yPos = getHeightAt(tree.position.x, tree.position.z);
+    if (yPos > water.position.y) {
+      tree.position.y = yPos;
+    } else {
+      treesGroup.remove(tree); // not great -- would be better to skip generating those trees, or generate something else instead
+    }
   });
 }
 

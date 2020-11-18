@@ -38,9 +38,11 @@ function generateTexture(width, height) {
   heightmapCanvas.width = width;
   heightmapCanvas.height = height;
 
+  // clear rect
   c.fillStyle = 'black';
   c.fillRect(0, 0, width, height);
 
+  // fill noise
   for(let x = 0; x < width; x++) {
       for(let y = 0; y < height; y++) {
           let value =  sampleOctavedNoise(x/width, y/height, NOISE_OCTAVES);
@@ -49,11 +51,25 @@ function generateTexture(width, height) {
           c.fillRect(x,y, 1,1);
       }
   }
+
+  // fill "lake"
+  const lakeRadius = randomRange(5, 20);
+  let lakeCenterX = randomRange(0, width);
+  let lakeCenterY = randomRange(0, height);
+
+  c.beginPath();
+  c.arc(lakeCenterX, lakeCenterY, lakeRadius, 0, 2 * Math.PI, false);
+  c.fillStyle = 'rgba(0,0,0,0.9)';
+  c.fill();
+  c.lineWidth = 5;
+  c.strokeStyle = 'rgba(0,0,0,0.3)';
+  c.stroke();
+
   return c.getImageData(0,0,width,height);
 }
 
 const heightColors = [
-  0x002911,
+  0x604011,
   0x003911,
   0x004511,
   0x004911,

@@ -5,9 +5,9 @@
 
 re-add terrain details (spawning on ground, roughly per height) DONE
 
-add "lake" to terrain heightmap generator
-add rough water plane with transparent color
-prevent tree spawns below water plane
+add rough "lake" to terrain heightmap generator DONE
+add rough water plane with transparent color DONE
+prevent tree spawns below water plane DONE
 
 fix trunk overextension?
 cloud Y-squash options?
