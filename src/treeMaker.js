@@ -49,7 +49,6 @@ export function makeLollipopTree() {
 }
 
 export function makeConiferTree() {
-  // const group = new THREE.Group();
   const geometry = new THREE.Geometry();
   const leafWidthScale = randomRangeFromArray(widthScaleRange);
   const leafBottom = randomRangeFromArray(leafBottomOffsetRange);
@@ -65,14 +64,6 @@ export function makeConiferTree() {
     leafTier.rotateY(randomRange(0, 1));
     leafTier.faces.forEach(f => f.color.set(0x008022));
     geometry.merge(leafTier);
-    
-    // const leafTier = new THREE.Mesh(
-    //   new THREE.ConeGeometry(tierWidth, tierHeight, radialSegments),
-    //   new THREE.MeshLambertMaterial({color:0x009922})
-    // );
-    // leafTier.position.y = tierY;
-    // leafTier.rotation.y = randomRange(0, 360);
-    // group.add(leafTier);
   });
 
   const trunkWidth = randomRangeFromArray(trunkWidthRange);
@@ -92,6 +83,7 @@ export function makeConiferTree() {
     geometry.computeFlatVertexNormals();
   }
 
+  // for reference: BufferGeometry is supposed to be more performant
   // const performantGeometry = new BufferGeometry();
   // performantGeometry.fromGeometry(geometry);
 
@@ -99,14 +91,4 @@ export function makeConiferTree() {
     geometry,
     treeMaterial,
   );
-
-  // const trunk = new THREE.Mesh(
-  //     new THREE.CylinderGeometry(trunkWidth, trunkWidth, 2, 5),
-  //     new THREE.MeshLambertMaterial({color:0xbb6600})
-  // );
-  // trunk.rotation.y = randomRange(0, 360);
-  // trunk.position.y = 0;
-  // group.add(trunk);
-
-  // return group;
 }

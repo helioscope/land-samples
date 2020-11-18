@@ -39,7 +39,7 @@ function generateTexture(width, height) {
   heightmapCanvas.height = height;
 
   c.fillStyle = 'black';
-  c.fillRect(0,0,width, height);
+  c.fillRect(0, 0, width, height);
 
   for(let x = 0; x < width; x++) {
       for(let y = 0; y < height; y++) {
@@ -83,7 +83,6 @@ function getColorForHeight(height) {
 }
 
 export function makeGroundPlane(width, height, seed=undefined) {
-  console.log('generating plane:', width, height);
   const geometry = new THREE.PlaneGeometry(width, height, width, height);
 
   if (seed !== undefined) {
@@ -92,7 +91,6 @@ export function makeGroundPlane(width, height, seed=undefined) {
   }
 
   const texture = generateTexture(width, height);
-  console.log('texture dimensions:', width)
   for(let ty = 0; ty < texture.height; ty++) {
     for (let tx = 0; tx < texture.width; tx++) {
         const vertIndex = (ty * (texture.height) + tx);
@@ -102,6 +100,7 @@ export function makeGroundPlane(width, height, seed=undefined) {
         
         vert.z = remapValue(value, 0,255, 0,7);
 
+        // some ideas from the tutorial:
         // if(vert.z > 2.5) vert.z *= 1.3 //exaggerate the peaks
         
         // vert.x += map(Math.random(),0,1,-0.5,0.5) //jitter x
