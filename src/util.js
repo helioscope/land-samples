@@ -1,5 +1,8 @@
-export function randomOdds(chance) { // assumes chance is between 0 and 1
-  return Math.random() <= chance;
+import _ from 'lodash';
+
+export function randomOdds(chance) {
+  // assumes chance is between 0 and 1, so 0.5 is 50% odds
+  return Math.random() < chance;
 }
 
 export function randomRange(min, max) {
@@ -18,8 +21,8 @@ export function remapValue(value, inMin, inMax, outMin, outMax) {
   return outRange * ((value - inMin) / inRange) + outMin;
 }
 
-//randomly displace the x,y,z coords by the `per` value
 export function jitterVertices(geometry, maxDistance){
+  // note: maxDistance is per axis, linear distance could be greater
   _.each(geometry.vertices, (v) => {
     v.x += randomRange(-maxDistance, maxDistance),
     v.y += randomRange(-maxDistance, maxDistance),
@@ -28,7 +31,7 @@ export function jitterVertices(geometry, maxDistance){
 }
 
 export function mushBottom(geometry, bottomY) {
-  geometry.vertices.forEach((v) => {
+  _.each(geometry.vertices, (v) => {
     v.y = Math.max(v.y, bottomY)
   });
 }
