@@ -3,13 +3,15 @@ more interesting lakes:
 - chance of using ellipse shapes for lakes
 - slightly more complex lake shapes (may add multiple shapes)
 - chance of spawning islands within lakes
-simple dead tree generator
-basic log generator (note: may need special placement rules to orient to the terrain)
-basic stump generator
+- chance of not spawning any lakes
+- chance of spawning multiple lakes
+simple dead tree generator DONE
+basic stump generator DONE
 basic camera-controller (can probably use something from threejs extras/examples)
 start hooking up dat.gui to be able to tweak settings live
 simple cone-tree generator
 fix terrain edges (off by one v heightmap texture?)
+basic log generator (note: may need special placement rules to orient to the terrain)
 
 ## Ideas: ##
 
@@ -20,7 +22,7 @@ export meshes to fbx?
 Tree improvements:
 - fix trunk overextension?
 - tree color variation (ideally, interpolate between a few different colors -- can use THREE.Color.lerp, or define gradient)
-- dead tree generator
+- dead tree generator DONE
 - simple cone-tree generator
 
 Cloud improvements:
