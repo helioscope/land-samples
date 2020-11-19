@@ -1,9 +1,9 @@
 import * as THREE from 'three';
 
-import {makeConiferTree, makeLollipopTree} from './treeMaker';
+import {makeConiferTree, makeDeadTree, makeLollipopTree, makeTreeStump} from './treeMaker';
 import {makeCumulousCloud} from './cloudMaker';
 import { makeGroundPlane, getHeightAt } from './groundMaker';
-import {randomOdds, randomRange, randomRangeFromArray} from './util';
+import {randomOdds, randomRangeFromArray} from './util';
 
 
 let light = null;
@@ -118,7 +118,17 @@ function createWater() {
 
 function createTrees() {
   const removalOdds = 1 - randomRangeFromArray(treeSpawnOddsRange);
-  spawnInGrid(trees, treesGroup, makeConiferTree, NUM_TREES, 4.5, (tree) => {
+  let randomTreeSpawn = () => {
+    let odds = Math.random();
+    if (odds < 0.1) {
+      return makeTreeStump();
+    } else if (odds < 0.35) {
+      return makeDeadTree();
+    } else {
+      return makeConiferTree();
+    }
+  }
+  spawnInGrid(trees, treesGroup, randomTreeSpawn, NUM_TREES, 4.5, (tree) => {
     if (randomOdds(removalOdds)) {
       treesGroup.remove(tree);
       return;
@@ -130,6 +140,13 @@ function createTrees() {
       treesGroup.remove(tree); // not great -- would be better to skip generating those trees, or generate something else instead
     }
   });
+
+  // let centeredTree = makeLeaflessTree();
+  // centeredTree.position.y = 12;
+  // centeredTree.rotateZ(RADIANS_FOR_90_DEGREES);
+  // trees.push(centeredTree);
+  // treesGroup.add(centeredTree);
+  // centeredTree.scale.set(5,5,5);
 }
 
 function createClouds() {
