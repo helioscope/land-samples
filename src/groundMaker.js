@@ -1,3 +1,5 @@
+// started from tutorial at: https://blog.mozvr.com/low-poly-style-terrain-generation/
+
 import _ from 'lodash';
 import * as THREE from 'three';
 import SimplexNoise from 'simplex-noise';

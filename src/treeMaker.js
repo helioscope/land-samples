@@ -1,3 +1,5 @@
+// started from tutorial at: https://medium.com/@joshmarinacci/procedural-geometry-trees-896cc06f54ce
+
 import _ from 'lodash';
 import * as THREE from 'three';
 

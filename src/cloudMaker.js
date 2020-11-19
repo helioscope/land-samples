@@ -1,7 +1,9 @@
-import _, { random } from 'lodash';
+// started from tutorial at: https://blog.mozvr.com/procedural-geometry-low-poly-clouds/
+
+import _ from 'lodash';
 import * as THREE from 'three';
 
-import {jitterVertices, mushBottom, randomRange, randomRangeFromArray} from './util';
+import {jitterVertices, mushBottom, randomRangeFromArray} from './util';
 
 const USE_HARD_EDGE_LOWPOLY_STYLE = false;
 const cloudMaterial = new THREE.MeshLambertMaterial({
