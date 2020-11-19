@@ -2,8 +2,20 @@
 
 import _ from 'lodash';
 import * as THREE from 'three';
+import { RGBA_ASTC_5x4_Format } from 'three';
 
-import {randomRange, randomRangeFromArray, jitterVertices} from './util';
+import {
+  randomRange, 
+  randomRangeFromArray,
+  jitterVertices, 
+  randomRangeInt, 
+  remapValue, 
+  RADIANS_FOR_1_DEGREE, 
+  RADIANS_FOR_90_DEGREES, 
+  RADIANS_FOR_360_DEGREES, 
+  RADIANS_FOR_180_DEGREES,
+  RADIANS_FOR_270_DEGREES
+} from './util';
 
 const USE_HARD_EDGE_LOWPOLY_STYLE = false;
 
@@ -38,6 +50,85 @@ export function makeLollipopTree() {
 
   const randomScale = randomRangeFromArray(finalScaleRange);
   geometry.scale(randomScale, randomScale, randomScale);
+
+  if (USE_HARD_EDGE_LOWPOLY_STYLE) {
+    geometry.verticesNeedUpdate = true;
+    geometry.computeFlatVertexNormals();
+  }
+
+  return new THREE.Mesh(
+    geometry,
+    treeMaterial,
+  );
+}
+
+export function makeDeadTree() {
+  const geometry = new THREE.Geometry();
+
+  const trunkWidth = randomRangeFromArray(trunkWidthRange) * 0.5;
+  const trunkHeight = randomRange(3, 5.75);
+  const trunk = new THREE.CylinderGeometry(trunkWidth, trunkWidth, trunkHeight, 5);
+  trunk.translate(0, trunkHeight * 0.5, 0);
+  trunk.faces.forEach(f => f.color.set(0x604011));
+  geometry.merge(trunk);
+
+  const minBranches = 2; // should move this outside
+  const maxBranches = 7; // should move this outside
+  const numBranches = randomRangeInt(minBranches, maxBranches);
+
+  const minOrientationIncrement = RADIANS_FOR_90_DEGREES;
+  const maxOrientationIncrement = RADIANS_FOR_180_DEGREES;
+
+  const branchHeightMin = 0.75; // dist from base
+
+  const branchHeightMax = trunkHeight - 0.75;
+  const branchWidth = trunkWidth * 0.5;
+  const branchLengthRange = [0.2, 0.8]; // should move this outside
+  
+  let lastOrientation = 0;
+  for (let i = 0; i < numBranches; i++) {
+    const branchLength = randomRangeFromArray(branchLengthRange) / (i * 0.25 + 1); // note: tendency to get smaller as they go up (should move rate outside)
+    const branch = new THREE.CylinderGeometry(branchWidth, branchWidth, branchLength, 5);
+    const branchOrientation = lastOrientation + randomRange(minOrientationIncrement, maxOrientationIncrement);
+    const branchOffset = new THREE.Vector2((branchLength * 0.5 ) + (trunkWidth * 0.5) - 0.05, 0); // to push branch outside of the trunk
+    const branchPosY = remapValue(i, 0, numBranches-1, branchHeightMin, branchHeightMax); // todo: make the interval a little more variable
+    
+    branch.rotateZ(RADIANS_FOR_90_DEGREES);
+    branch.rotateY(branchOrientation);
+    branchOffset.rotateAround(new THREE.Vector2(0,0), -branchOrientation); // aligns the branchoffset amounts to the angle of the branch rotation
+    branch.translate(branchOffset.x, branchPosY, branchOffset.y);
+
+    branch.faces.forEach(f => f.color.set(0x604011));
+    geometry.merge(branch);
+    
+    lastOrientation = branchOrientation;
+  }
+
+  const randomScale = randomRangeFromArray(finalScaleRange);
+  geometry.scale(randomScale, randomScale, randomScale);
+  geometry.rotateX(randomRange(0, 6 * RADIANS_FOR_1_DEGREE));
+  geometry.rotateY(randomRange(0, 6 * RADIANS_FOR_360_DEGREES));
+
+  if (USE_HARD_EDGE_LOWPOLY_STYLE) {
+    geometry.verticesNeedUpdate = true;
+    geometry.computeFlatVertexNormals();
+  }
+
+  return new THREE.Mesh(
+    geometry,
+    treeMaterial,
+  );
+}
+
+export function makeTreeStump() {
+  const geometry = new THREE.Geometry();
+  const trunkWidth = randomRangeFromArray(trunkWidthRange);
+  const trunkHeight = randomRange(0.5,1);
+  const trunk = new THREE.CylinderGeometry(trunkWidth, trunkWidth, trunkHeight, 7);
+  trunk.translate(0, trunkHeight * 0.45, 0);
+  trunk.rotateY(randomRange(0, RADIANS_FOR_360_DEGREES));
+  trunk.faces.forEach(f => f.color.set(0x604011));
+  geometry.merge(trunk);
 
   if (USE_HARD_EDGE_LOWPOLY_STYLE) {
     geometry.verticesNeedUpdate = true;
