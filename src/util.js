@@ -1,5 +1,11 @@
 import _ from 'lodash';
 
+export const RADIANS_FOR_1_DEGREE = Math.PI / 180;
+export const RADIANS_FOR_90_DEGREES = Math.PI * 0.5;
+export const RADIANS_FOR_180_DEGREES = Math.PI;
+export const RADIANS_FOR_270_DEGREES = Math.PI * 1.5;
+export const RADIANS_FOR_360_DEGREES = Math.PI * 2;
+
 export function randomOdds(chance) {
   // assumes chance is between 0 and 1, so 0.5 is 50% odds
   return Math.random() < chance;
@@ -8,6 +14,10 @@ export function randomOdds(chance) {
 export function randomRange(min, max) {
   const range = max - min;
   return (Math.random() * range) + min;
+}
+export function randomRangeInt(min, max) {
+  const range = max - min + 1; // add 1 to be inclusive of the max value
+  return Math.floor((Math.random() * range) + min);
 }
 
 export function randomRangeFromArray(arr) {
