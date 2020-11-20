@@ -1,18 +1,22 @@
 ## Goals: ##
-more interesting lakes:
-- chance of using ellipse shapes for lakes
-- slightly more complex lake shapes (may add multiple shapes)
-- chance of spawning islands within lakes
-- chance of not spawning any lakes
-- chance of spawning multiple lakes
-simple dead tree generator DONE
-basic stump generator DONE
+improve y-positioning of trees, etc DONE
+generate additional ground-cover
+- flowers
+- grasses
+- rocks
+camera controls improvements:
+- auto-rotate until camera control is used, then wait N seconds before moving again, slowly building speed
+- hotkey to reset/recenter (to undo significant panning)
 presets for different kinds of dioramas (trees: natural, all dead, heavily deforested, slightly used, etc)
-basic camera-controller (can probably use something from threejs extras/examples)
-start hooking up dat.gui to be able to tweak settings live
-simple cone-tree generator
+prevent spawn overlap (e.g. for ground-cover + trees) (save vector2 + radius for each object, separated into layers?)
+start hooking up dat.gui to be able to tweak settings live (especially useful for experimenting with colors)
 fix terrain edges (off by one v heightmap texture?)
-basic log generator (note: may need special placement rules to orient to the terrain)
+extend terrain below (to make a dirt-cube of sorts)
+extend water below (to make a water-cube of sorts)
+slightly more complex lake shapes (may add multiple shapes within one tight region)
+basic fallen-log generator (note: may need special placement rules to orient to the terrain)
+butterfly generator
+simple cone-tree generator
 
 ## Ideas: ##
 
@@ -37,9 +41,10 @@ Cloud improvements:
 
 Terrain improvements:
 - fix terrain edges (off by one v heightmap texture?)
-- chance of using ellipse shapes for lakes
+- chance of using different shapes for lakes?
 - slightly more complex shapes (may add multiple shapes)
-- chance of spawning islands within lakes
+- improved island shapes
+- improved island spawn bounds
 - rivers
 - mountains
 - soft-edged lakes
@@ -55,13 +60,11 @@ Water improvements:
 - explore custom shaders to do above-mentioned things & more fanciness?
 
 Spawn behavior improvements:
-- % chance of not spawning DONE (rarely looks good for the clouds or trees, though -- octave-noise-based odds would be better for trees, maybe clouds too)
 - grid offset (risk of overlap there, mind)
 - sample octaved noise to affect spawn odds
 - restricted height range (or at least, height affecting spawn odds)
 - restricted slope range
 - ability to skip spawn, rather than hiding it afterwards
-- spawn Y according to raycast (may be slow)
 - split out grid-spawning code
 
 Noise texture improvements:
