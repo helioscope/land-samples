@@ -4,6 +4,7 @@ import {makeConiferTree, makeDeadTree, makeLollipopTree, makeTreeStump} from './
 import {makeCumulousCloud} from './cloudMaker';
 import { makeGroundPlane, getHeightAt } from './groundMaker';
 import {randomOdds, randomRangeFromArray} from './util';
+import { Vector3 } from 'three';
 
 
 let light = null;
@@ -128,25 +129,35 @@ function createTrees() {
       return makeConiferTree();
     }
   }
+  const downVector = new THREE.Vector3(0, -1, 0);
+  const raycaster = new THREE.Raycaster( new THREE.Vector3(), downVector, 0.1, 100);
   spawnInGrid(trees, treesGroup, randomTreeSpawn, NUM_TREES, 4.5, (tree) => {
     if (randomOdds(removalOdds)) {
       treesGroup.remove(tree);
       return;
     }
-    let yPos = getHeightAt(tree.position.x, tree.position.z);
-    if (yPos > water.position.y) {
-      tree.position.y = yPos;
+    
+    raycaster.set(new Vector3(tree.position.x, 30, tree.position.z), downVector);
+    
+    let intersections = raycaster.intersectObject(ground);
+    let canPlaceHere = true;
+    let yPos = 0;
+    
+    if (intersections.length == 0) {
+      canPlaceHere = false;
+    } else {
+      yPos = intersections[0].point.y;
+      if (yPos <= water.position.y) {
+        canPlaceHere = false;
+      }
+    }
+
+    if (canPlaceHere) {
+      tree.position.y = yPos - 0.05;
     } else {
       treesGroup.remove(tree); // not great -- would be better to skip generating those trees, or generate something else instead
     }
   });
-
-  // let centeredTree = makeLeaflessTree();
-  // centeredTree.position.y = 12;
-  // centeredTree.rotateZ(RADIANS_FOR_90_DEGREES);
-  // trees.push(centeredTree);
-  // treesGroup.add(centeredTree);
-  // centeredTree.scale.set(5,5,5);
 }
 
 function createClouds() {
