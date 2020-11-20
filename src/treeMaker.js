@@ -65,15 +65,15 @@ export function makeLollipopTree() {
 export function makeDeadTree() {
   const geometry = new THREE.Geometry();
 
-  const trunkWidth = randomRangeFromArray(trunkWidthRange) * 0.5;
-  const trunkHeight = randomRange(3, 5.75);
-  const trunk = new THREE.CylinderGeometry(trunkWidth, trunkWidth, trunkHeight, 5);
+  const trunkWidth = randomRangeFromArray(trunkWidthRange) * 0.7;
+  const trunkHeight = randomRange(3, 5);
+  const trunk = new THREE.CylinderGeometry(trunkWidth * 0.5, trunkWidth, trunkHeight, 5);
   trunk.translate(0, trunkHeight * 0.5, 0);
   trunk.faces.forEach(f => f.color.set(0x604011));
   geometry.merge(trunk);
 
-  const minBranches = 2; // should move this outside
-  const maxBranches = 7; // should move this outside
+  const minBranches = 4; // should move this outside
+  const maxBranches = 9; // should move this outside
   const numBranches = randomRangeInt(minBranches, maxBranches);
 
   const minOrientationIncrement = RADIANS_FOR_90_DEGREES;
@@ -83,14 +83,14 @@ export function makeDeadTree() {
 
   const branchHeightMax = trunkHeight - 0.75;
   const branchWidth = trunkWidth * 0.5;
-  const branchLengthRange = [0.2, 0.8]; // should move this outside
+  const branchLengthRange = [0.4, 0.75]; // should move this outside
   
   let lastOrientation = 0;
   for (let i = 0; i < numBranches; i++) {
     const branchLength = randomRangeFromArray(branchLengthRange) / (i * 0.25 + 1); // note: tendency to get smaller as they go up (should move rate outside)
     const branch = new THREE.CylinderGeometry(branchWidth, branchWidth, branchLength, 5);
     const branchOrientation = lastOrientation + randomRange(minOrientationIncrement, maxOrientationIncrement);
-    const branchOffset = new THREE.Vector2((branchLength * 0.5 ) + (trunkWidth * 0.5) - 0.05, 0); // to push branch outside of the trunk
+    const branchOffset = new THREE.Vector2((branchLength * 0.5 ) + (trunkWidth * 0.25) - 0.05, 0); // to push branch outside of the trunk
     const branchPosY = remapValue(i, 0, numBranches-1, branchHeightMin, branchHeightMax); // todo: make the interval a little more variable
     
     branch.rotateZ(RADIANS_FOR_90_DEGREES);
@@ -150,7 +150,7 @@ export function makeConiferTree() {
     const tierWidth = (width * leafWidthScale) + randomRangeFromArray(tierScaleOffsetVariation);
     const tierHeight = 2;
     const radialSegments = 5;
-    const tierY = leafBottom + defaultTierYOffsets[index] + randomRangeFromArray(tierYOffsetVariation);
+    const tierY = leafBottom + defaultTierYOffsets[index] + randomRangeFromArray(tierYOffsetVariation) + tierHeight * 0.5 - tierScaleOffsetVariation[1];
     
     const leafTier = new THREE.ConeGeometry(tierWidth, tierHeight, radialSegments)
     leafTier.translate(0, tierY, 0);
@@ -160,8 +160,9 @@ export function makeConiferTree() {
   });
 
   const trunkWidth = randomRangeFromArray(trunkWidthRange);
-  const trunk = new THREE.CylinderGeometry(trunkWidth, trunkWidth, 2, 5);
-  trunk.translate(0,0,0);
+  const trunkHeight = 2;
+  const trunk = new THREE.CylinderGeometry(trunkWidth, trunkWidth, trunkHeight, 5);
+  trunk.translate(0,trunkHeight * 0.5 - 0.1, 0);
   trunk.rotateY(randomRange(0, 1));
   trunk.faces.forEach(f => f.color.set(0x604011));
   geometry.merge(trunk);
