@@ -1,6 +1,12 @@
 import _ from 'lodash';
 import * as THREE from 'three';
+
+require('./threejs-extras/OrbitControls');
+
+let controls = null;
+
 import { initDiorama, generateDiorama } from './diorama';
+import { RADIANS_FOR_1_DEGREE } from './util';
 
 let rootElem = null;
 let renderer= null;
@@ -9,8 +15,6 @@ let camera = null;
 let clock = null;
 
 let dioramaGroup = null;
-
-const DEFAULT_SPIN_RATE = (Math.PI/90) * 10;
 
 function init() {
   rootElem = document.getElementById('app-root');
@@ -32,6 +36,15 @@ function init() {
 
   camera.position.z = 20;
   camera.position.y = 12;
+
+  controls = new THREE.OrbitControls( camera, renderer.domElement );
+  controls.enableDamping = true;
+  controls.maxDistance = 50;
+  controls.minDistance = 3;
+  controls.maxPolarAngle = RADIANS_FOR_1_DEGREE * 85;
+  controls.zoomSpeed = 0.6;
+  controls.target.y = 2.5;
+
   
   animate();
 
@@ -44,7 +57,7 @@ function init() {
 
 function animate() {
   requestAnimationFrame( animate );
-  dioramaGroup.rotation.y += DEFAULT_SPIN_RATE * clock.getDelta();
+  controls.update();
   renderer.render( scene, camera );
 }
 

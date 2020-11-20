@@ -7,6 +7,7 @@ more interesting lakes:
 - chance of spawning multiple lakes
 simple dead tree generator DONE
 basic stump generator DONE
+presets for different kinds of dioramas (trees: natural, all dead, heavily deforested, slightly used, etc)
 basic camera-controller (can probably use something from threejs extras/examples)
 start hooking up dat.gui to be able to tweak settings live
 simple cone-tree generator
@@ -17,7 +18,12 @@ basic log generator (note: may need special placement rules to orient to the ter
 
 transition towards deterministic generators, increasingly parametric (e.g. trunk height, trunk width, trunk color, leaf color, leafball height, leafball-jitter dist, random seed, scale)
 
-export meshes to fbx?
+export meshes? 
+obj is supposedly unity-supported: https://github.com/mrdoob/three.js/blob/master/examples/js/exporters/OBJExporter.js
+collada supposedly is too: https://github.com/mrdoob/three.js/blob/master/examples/js/exporters/ColladaExporter.js
+other three.js exporters: https://github.com/mrdoob/three.js/tree/master/examples/js/exporters
+unity docs: https://docs.unity3d.com/Manual/3D-formats.html#Exported3DFiles
+
 
 Tree improvements:
 - fix trunk overextension?
@@ -37,9 +43,11 @@ Terrain improvements:
 - rivers
 - mountains
 - soft-edged lakes
+- color variation
 
 Water improvements:
 - split off code
+- color variation
 - add noise to normals for wavy look
 - sample terrain-height to add shoreline coloring
 - minor height variation
