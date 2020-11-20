@@ -1,12 +1,12 @@
 ## Goals: ##
-improve y-positioning of trees, etc DONE
 generate additional ground-cover
-- flowers
+- flowers DONE
 - grasses
-- rocks
+- rocks DONE
 camera controls improvements:
-- auto-rotate until camera control is used, then wait N seconds before moving again, slowly building speed
+- auto-rotate until camera control is used, then wait N seconds of no control before moving again, slowly building speed
 - hotkey to reset/recenter (to undo significant panning)
+- better initial camera position
 presets for different kinds of dioramas (trees: natural, all dead, heavily deforested, slightly used, etc)
 prevent spawn overlap (e.g. for ground-cover + trees) (save vector2 + radius for each object, separated into layers?)
 start hooking up dat.gui to be able to tweak settings live (especially useful for experimenting with colors)

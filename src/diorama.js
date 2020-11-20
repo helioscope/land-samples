@@ -3,8 +3,9 @@ import * as THREE from 'three';
 import {makeConiferTree, makeDeadTree, makeLollipopTree, makeTreeStump} from './treeMaker';
 import {makeCumulousCloud} from './cloudMaker';
 import { makeGroundPlane, getHeightAt } from './groundMaker';
-import {randomOdds, randomRangeFromArray} from './util';
+import {randomDistanceVector2, randomOdds, randomRange, randomRangeFromArray} from './util';
 import { Vector3 } from 'three';
+import { makeFlowerBunch, makeRock } from './groundStuffMaker';
 
 
 let light = null;
@@ -12,6 +13,7 @@ let trees = [];
 let clouds = [];
 let ground = null;
 let water = null;
+let groundStuff = [];
 let dioramaGroup = null;
 let treesGroup = null;
 
@@ -61,18 +63,23 @@ export function generateDiorama() {
   createGround();
   createWater();
   createTrees();
+  createGroundStuff();
   createClouds();
 
   return dioramaGroup;
 }
 
-function spawnInGrid(collection, group, spawnFunction, gridSize, separationDistance, postSpawnFunction = _.noop) {
+function cleanUpObjects(collection, group) {
   if (collection.length > 0) {
     _.each(collection, (item) => {
       group.remove(item);
     });
     collection.splice(collection.length);
   }
+}
+
+function spawnInGrid(collection, group, spawnFunction, gridSize, separationDistance, postSpawnFunction = _.noop) {
+  cleanUpObjects(collection, group);
   for (let x = 0; x < gridSize; x++) {
     for (let y = 0; y < gridSize; y++) {
       let item = spawnFunction();
@@ -158,6 +165,58 @@ function createTrees() {
       treesGroup.remove(tree); // not great -- would be better to skip generating those trees, or generate something else instead
     }
   });
+}
+
+function createGroundStuff() {
+  const groundWidth = NUM_TREES * 4.5;
+  const groundLength = NUM_TREES * 4.5;
+  
+  const leftBound = groundWidth * -0.5 + 1;
+  const rightBound = groundWidth * 0.5 - 1;
+  const nearBound = groundLength * -0.5 + 1;
+  const farBound = groundLength * 0.5 - 1;
+  const xBounds = [leftBound, rightBound];
+  const zBounds = [nearBound, farBound];
+
+  const downVector = new THREE.Vector3(0, -1, 0);
+  const raycaster = new THREE.Raycaster( new THREE.Vector3(), downVector, 0.1, 100);
+
+  const numObjects = randomRange(10,60);
+
+  let randomSpawn = () => {
+    let odds = Math.random();
+    if (odds < 0.9) {
+      return makeFlowerBunch();
+    } else {
+      return makeRock();
+    }
+  }
+
+  cleanUpObjects(groundStuff, dioramaGroup);
+
+  for (let i = 0; i < numObjects; i++) {
+    raycaster.set(new Vector3(randomRangeFromArray(xBounds), 30, randomRangeFromArray(zBounds)), downVector);
+    
+    let intersections = raycaster.intersectObject(ground);
+    let pos = new THREE.Vector3();
+    let canPlaceHere = true;
+    
+    if (intersections.length == 0) {
+      canPlaceHere = false;
+    } else {
+      pos = intersections[0].point;
+      if (pos.y <= water.position.y) {
+        canPlaceHere = false;
+      }
+    }
+
+    if (canPlaceHere) {
+      const spawnedObject = randomSpawn();
+      spawnedObject.position.copy(pos);
+      dioramaGroup.add(spawnedObject);
+      groundStuff.push(spawnedObject);
+    }
+  }
 }
 
 function createClouds() {
