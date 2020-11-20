@@ -4,7 +4,7 @@ import _ from 'lodash';
 import * as THREE from 'three';
 import SimplexNoise from 'simplex-noise';
 
-import {randomRange, remapValue} from './util';
+import {RADIANS_FOR_180_DEGREES, RADIANS_FOR_1_DEGREE, RADIANS_FOR_360_DEGREES, randomRange, randomRangeInt, remapValue} from './util';
 
 
 let noiseSeed = new Date().toString();
@@ -35,10 +35,17 @@ function sampleOctavedNoise(x, y, octaveCount) {
 }
 
 function generateTexture(width, height) {
-  const c = heightmapContext;
-  
   heightmapCanvas.width = width;
   heightmapCanvas.height = height;
+
+  generateNoiseTexture(width, height);
+  generateLakes(width, height);
+  
+  return heightmapContext.getImageData(0,0,width,height);
+}
+
+function generateNoiseTexture(width, height) {
+  const c = heightmapContext;
 
   // clear rect
   c.fillStyle = 'black';
@@ -53,21 +60,65 @@ function generateTexture(width, height) {
           c.fillRect(x,y, 1,1);
       }
   }
+}
 
-  // fill "lake"
-  const lakeRadius = randomRange(5, 20);
-  let lakeCenterX = randomRange(0, width);
-  let lakeCenterY = randomRange(0, height);
+function generateLakes(width, height) {
+  const c = heightmapContext;
+  const numBigLakes = randomRangeInt(0,1);
+  const numSmallLakes = randomRangeInt(0,4);
 
-  c.beginPath();
-  c.arc(lakeCenterX, lakeCenterY, lakeRadius, 0, 2 * Math.PI, false);
-  c.fillStyle = 'rgba(0,0,0,0.9)';
-  c.fill();
-  c.lineWidth = 5;
-  c.strokeStyle = 'rgba(0,0,0,0.3)';
-  c.stroke();
+  for (let i = 0; i < numSmallLakes; i++) {
+    const lakeRadiusX = randomRange(1, 5);
+    const lakeRadiusY = randomRange(1, 5);
+    const lakeAngle = randomRange(0, RADIANS_FOR_180_DEGREES);
+    const lakeCenterX = randomRange(0, width);
+    const lakeCenterY = randomRange(0, height);
 
-  return c.getImageData(0,0,width,height);
+    c.beginPath();
+    c.ellipse(lakeCenterX, lakeCenterY, lakeRadiusX, lakeRadiusY, lakeAngle, 0, RADIANS_FOR_360_DEGREES, false);
+    c.fillStyle = 'rgba(0,0,0,0.9)';
+    c.fill();
+    c.lineWidth = 5;
+    c.strokeStyle = 'rgba(0,0,0,0.3)';
+    c.stroke();
+  }
+
+  for (let i = 0; i < numBigLakes; i++) {
+    const lakeRadiusX = randomRange(5, 20);
+    const lakeRadiusY = randomRange(Math.max(5, lakeRadiusX / 3), Math.min(20, lakeRadiusX * 3));
+    const lakeAngle = randomRange(0, RADIANS_FOR_180_DEGREES);
+    const lakeCenterX = randomRange(0, width);
+    const lakeCenterY = randomRange(0, height);
+    const minLakeAxis = Math.min(lakeRadiusX, lakeRadiusY);
+    // const numExtraEllipses = randomRangeInt(0,2); // later
+    const numIslands = randomRangeInt(0, 3);
+
+    c.beginPath();
+    c.ellipse(lakeCenterX, lakeCenterY, lakeRadiusX, lakeRadiusY, lakeAngle, 0, RADIANS_FOR_360_DEGREES, false);
+    c.fillStyle = 'rgba(0,0,0,0.9)';
+    c.fill();
+    c.lineWidth = 5;
+    c.strokeStyle = 'rgba(0,0,0,0.3)';
+    c.stroke();
+
+    // for (let j = 0; j < numExtraEllipses; j++) { // later
+    //   let centerX = randomRange
+    // }
+
+    for (let j = 0; j < numIslands; j++) { 
+      // note: this currently just tries to stay within the bounds of the minimum axis, rather than the entire lake's bounds
+      let islandRadiusX = randomRange(1, Math.min(6, minLakeAxis - 2));
+      let islandRadiusY = randomRange(1, Math.min(6, minLakeAxis - 2));
+      let islandCenterX = randomRange(lakeCenterX - minLakeAxis + 1, lakeCenterX + minLakeAxis - 1);
+      let islandCenterY = randomRange(lakeCenterY - minLakeAxis + 1, lakeCenterY + minLakeAxis - 1);
+      let islandAngle = randomRange(lakeAngle - (RADIANS_FOR_1_DEGREE * 20), lakeAngle + (RADIANS_FOR_1_DEGREE * 20));
+      let islandHeightValue = randomRangeInt(30, 150); // note: corresponds to color-channel value (0-255)
+      c.beginPath();
+      c.ellipse(islandCenterX, islandCenterY, islandRadiusX, islandRadiusY, islandAngle, 0, RADIANS_FOR_360_DEGREES, false);
+      c.fillStyle = `rgba(${islandHeightValue}, ${islandHeightValue}, ${islandHeightValue}, 0.9)`;
+      c.fill();
+    }
+  }
 }
 
 const heightColors = [
