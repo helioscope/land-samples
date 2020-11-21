@@ -5,7 +5,7 @@ import {makeCumulousCloud} from './cloudMaker';
 import { makeGroundPlane, getHeightAt } from './groundMaker';
 import {randomDistanceVector2, randomOdds, randomRange, randomRangeFromArray} from './util';
 import { Vector3 } from 'three';
-import { makeFlowerBunch, makeRock } from './groundStuffMaker';
+import { makeFlowerBunch, makeRandomStick, makeRandomRock, makeStalkClump } from './groundStuffMaker';
 
 
 let light = null;
@@ -181,14 +181,18 @@ function createGroundStuff() {
   const downVector = new THREE.Vector3(0, -1, 0);
   const raycaster = new THREE.Raycaster( new THREE.Vector3(), downVector, 0.1, 100);
 
-  const numObjects = randomRange(10,60);
+  const numObjects = randomRange(30,150);
 
   let randomSpawn = () => {
     let odds = Math.random();
-    if (odds < 0.9) {
+    if (odds < 0.50) {
+      return makeStalkClump();
+    } else if (odds < 0.75) {
       return makeFlowerBunch();
+    } else if (odds < 0.95) {
+      return makeRandomStick();
     } else {
-      return makeRock();
+      return makeRandomRock();
     }
   }
 

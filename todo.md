@@ -1,20 +1,24 @@
 ## Goals: ##
-generate additional ground-cover
+generate additional ground-cover DONE
 - flowers DONE
-- grasses
+- weedy grasses DONE?
 - rocks DONE
+- sticks (sticking into/out of the ground a bit is probably ok) DONE
+experiment with groundcover optimization
+denser groundcover
 camera controls improvements:
 - auto-rotate until camera control is used, then wait N seconds of no control before moving again, slowly building speed
 - hotkey to reset/recenter (to undo significant panning)
 - better initial camera position
-presets for different kinds of dioramas (trees: natural, all dead, heavily deforested, slightly used, etc)
-prevent spawn overlap (e.g. for ground-cover + trees) (save vector2 + radius for each object, separated into layers?)
+increase contrast between stem & grass colors & ground color
+presets for different kinds of dioramas (trees: natural, all dead, heavily deforested, slightly used, everything)
 start hooking up dat.gui to be able to tweak settings live (especially useful for experimenting with colors)
 fix terrain edges (off by one v heightmap texture?)
 extend terrain below (to make a dirt-cube of sorts)
 extend water below (to make a water-cube of sorts)
 slightly more complex lake shapes (may add multiple shapes within one tight region)
-basic fallen-log generator (note: may need special placement rules to orient to the terrain)
+prevent spawn overlap (e.g. for ground-cover + trees) (save vector2 + radius for each object, separated into layers?)
+basic fallen-tree generator (note: may need special placement rules to orient to the terrain)?
 butterfly generator
 simple cone-tree generator
 
@@ -28,6 +32,9 @@ collada supposedly is too: https://github.com/mrdoob/three.js/blob/master/exampl
 other three.js exporters: https://github.com/mrdoob/three.js/tree/master/examples/js/exporters
 unity docs: https://docs.unity3d.com/Manual/3D-formats.html#Exported3DFiles
 
+Ground-cover improvements:
+- grass blades (2-sided triangles -- maybe these should be handled separately, to combine into one mesh while still observing ground height)
+- floating flower hints (low, colorful triangles, roughly parallel to ground -- could double for fallen leaves, & low ground plants -- maybe should handle like grass)
 
 Tree improvements:
 - fix trunk overextension?
@@ -38,6 +45,7 @@ Tree improvements:
 Cloud improvements:
 - cloud Y-squash options?
 - extra tufts range?
+- animation?
 
 Terrain improvements:
 - fix terrain edges (off by one v heightmap texture?)
@@ -86,7 +94,6 @@ basic world-bits wrapper? (track/manage the parts that get updated/animated? + h
 
 basic sun-wrapper? (includes skybox bits (light + textured/vertex-colored inverted sphere? + methods to tweak the sun angle (and get appropriate colorations)))
 
-basic grass generator
 basic house generator?
 
 basic editor for placing & editing things on the terrain from a top-down, ortho/2D perspective
