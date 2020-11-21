@@ -4,7 +4,6 @@ denser groundcover
 add water spawns (long stalks, large fallen branch, rocks)
 camera controls improvements:
 - auto-rotate until camera control is used, then wait N seconds of no control before moving again, slowly building speed
-- hotkey to reset/recenter (to undo significant panning) DONE
 - better initial camera position
 increase contrast between stem & grass colors & ground color
 presets for different kinds of dioramas (trees: natural, all dead, heavily deforested, slightly used, everything)

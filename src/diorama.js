@@ -183,7 +183,7 @@ function createGroundStuff() {
 
   const numObjects = randomRange(30,150);
 
-  let randomSpawn = () => {
+  let spawnGroundObject = () => {
     let odds = Math.random();
     if (odds < 0.50) {
       return makeStalkClump();
@@ -196,6 +196,21 @@ function createGroundStuff() {
     }
   }
 
+  let spawnWaterObject = () => {
+    let odds = Math.random();
+    let obj = null;
+    if (odds < 0.50) {
+      obj = makeStalkClump();
+      obj.scale.y *= 3;
+    } else if (odds < 0.75) {
+      obj = makeRandomStick();
+      obj.scale.multiplyScalar(4);
+    } else {
+      obj = makeRandomRock();
+    }
+    return obj;
+  }
+
   cleanUpObjects(groundStuff, dioramaGroup);
 
   for (let i = 0; i < numObjects; i++) {
@@ -204,22 +219,26 @@ function createGroundStuff() {
     let intersections = raycaster.intersectObject(ground);
     let pos = new THREE.Vector3();
     let canPlaceHere = true;
+    let inWater = false;
     
     if (intersections.length == 0) {
       canPlaceHere = false;
     } else {
       pos = intersections[0].point;
       if (pos.y <= water.position.y) {
-        canPlaceHere = false;
+        inWater = true;
       }
     }
 
-    if (canPlaceHere) {
-      const spawnedObject = randomSpawn();
-      spawnedObject.position.copy(pos);
-      dioramaGroup.add(spawnedObject);
-      groundStuff.push(spawnedObject);
+    let spawnedObject = null;
+    if (inWater) {
+      spawnedObject = spawnWaterObject();
+    } else {
+      spawnedObject = spawnGroundObject();
     }
+    spawnedObject.position.copy(pos);
+    dioramaGroup.add(spawnedObject);
+    groundStuff.push(spawnedObject);
   }
 }
 
