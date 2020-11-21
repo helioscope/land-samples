@@ -13,9 +13,15 @@ export const VECTOR2_DOWN = new THREE.Vector2(0,-1);
 export const VECTOR2_LEFT = new THREE.Vector2(-1,0);
 export const VECTOR2_RIGHT = new THREE.Vector2(1,0);
 
+let getRandomValue = Math.random;
+
+export function setRandomFunction(newRandomFunction) {
+  getRandomValue = newRandomFunction;
+}
+
 export function randomOdds(chance) {
   // assumes chance is between 0 and 1, so 0.5 is 50% odds
-  return Math.random() < chance;
+  return getRandomValue() < chance;
 }
 
 export function randomPickOne(optionsArr) {
@@ -34,7 +40,7 @@ export function randomPickMultiple(optionsArr, numPicks) {
 
 export function randomRange(min, max) {
   const range = max - min;
-  return (Math.random() * range) + min;
+  return (getRandomValue() * range) + min;
 }
 export function randomRangeFromArray(arr) {
   return randomRange(arr[0],arr[1]);
@@ -42,7 +48,7 @@ export function randomRangeFromArray(arr) {
 
 export function randomRangeInt(min, max) {
   const range = max - min + 1; // add 1 to be inclusive of the max value
-  return Math.floor((Math.random() * range) + min);
+  return Math.floor((getRandomValue() * range) + min);
 }
 export function randomRangeIntFromArray(arr) {
   return randomRangeInt(arr[0],arr[1]);
