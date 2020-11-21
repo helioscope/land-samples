@@ -38,6 +38,12 @@ function generateTexture(width, height) {
   heightmapCanvas.width = width;
   heightmapCanvas.height = height;
 
+  const c = heightmapContext;
+
+  // clear rect
+  c.fillStyle = 'black';
+  c.fillRect(0, 0, width, height);
+
   generateNoiseTexture(width, height);
   generateLakes(width, height);
   
@@ -46,12 +52,6 @@ function generateTexture(width, height) {
 
 function generateNoiseTexture(width, height) {
   const c = heightmapContext;
-
-  // clear rect
-  c.fillStyle = 'black';
-  c.fillRect(0, 0, width, height);
-
-  // fill noise
   for(let x = 0; x < width; x++) {
       for(let y = 0; y < height; y++) {
           let value =  sampleOctavedNoise(x/width, y/height, NOISE_OCTAVES);
