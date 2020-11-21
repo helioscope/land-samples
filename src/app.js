@@ -51,6 +51,8 @@ function init() {
   document.addEventListener('keydown', (evt) => {
     if (evt.key == 'r') {
       dioramaGroup = generateDiorama();
+    } else if (evt.key == 'o') {
+      controls.reset();
     }
   });
 }
