@@ -1,5 +1,5 @@
 ## Goals: ##
-experiment with groundcover optimization
+experiment with groundcover optimization DONE FOR NOW (buffered geometry seems to go a long way)
 denser groundcover
 add water spawns (long stalks, large fallen branch, rocks)
 camera controls improvements:

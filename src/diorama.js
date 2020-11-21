@@ -181,7 +181,7 @@ function createGroundStuff() {
   const downVector = new THREE.Vector3(0, -1, 0);
   const raycaster = new THREE.Raycaster( new THREE.Vector3(), downVector, 0.1, 100);
 
-  const numObjects = randomRange(30,150);
+  const numObjects = randomRange(45,350);
 
   let spawnGroundObject = () => {
     let odds = Math.random();

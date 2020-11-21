@@ -1,6 +1,6 @@
 import _ from 'lodash';
 import * as THREE from 'three';
-import { Mesh, Vector3 } from 'three';
+import { BufferGeometry, Mesh, Vector3 } from 'three';
 
 import {
   randomRange, 
@@ -63,7 +63,7 @@ export function makeFlowerBunch(params) {
   }
 
   return new THREE.Mesh(
-    geometry,
+    new BufferGeometry().fromGeometry(geometry),
     defaultMaterial,
   );
 }
@@ -152,7 +152,7 @@ export function makeStalkClump(params) {
   }
 
   return new THREE.Mesh(
-    geometry,
+    new BufferGeometry().fromGeometry(geometry),
     defaultMaterial,
   );
 }
@@ -265,7 +265,7 @@ export function makeRock(params) {
   }
 
   return new THREE.Mesh(
-    geometry,
+    new BufferGeometry().fromGeometry(geometry),
     defaultMaterial,
   );
 }
