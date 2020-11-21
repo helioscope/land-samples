@@ -83,12 +83,14 @@ export function makeDeadTree() {
 
   const branchHeightMax = trunkHeight - 0.75;
   const branchWidth = trunkWidth * 0.5;
-  const branchLengthRange = [0.4, 0.75]; // should move this outside
+  const branchLengthRange = [0.4, 0.7]; // should move this outside
+  const branchTaperRange = [0.35, 0.85];
   
   let lastOrientation = 0;
   for (let i = 0; i < numBranches; i++) {
     const branchLength = randomRangeFromArray(branchLengthRange) / (i * 0.25 + 1); // note: tendency to get smaller as they go up (should move rate outside)
-    const branch = new THREE.CylinderGeometry(branchWidth, branchWidth, branchLength, 5);
+    const branchTaperFactor = randomRangeFromArray(branchTaperRange);
+    const branch = new THREE.CylinderGeometry(branchWidth, branchWidth * branchTaperFactor, branchLength, 5);
     const branchOrientation = lastOrientation + randomRange(minOrientationIncrement, maxOrientationIncrement);
     const branchOffset = new THREE.Vector2((branchLength * 0.5 ) + (trunkWidth * 0.25) - 0.05, 0); // to push branch outside of the trunk
     const branchPosY = remapValue(i, 0, numBranches-1, branchHeightMin, branchHeightMax); // todo: make the interval a little more variable
@@ -106,7 +108,7 @@ export function makeDeadTree() {
 
   const randomScale = randomRangeFromArray(finalScaleRange);
   geometry.scale(randomScale, randomScale, randomScale);
-  geometry.rotateX(randomRange(0, 6 * RADIANS_FOR_1_DEGREE));
+  geometry.rotateX(randomRange(0, 15 * RADIANS_FOR_1_DEGREE));
   geometry.rotateY(randomRange(0, 6 * RADIANS_FOR_360_DEGREES));
 
   if (USE_HARD_EDGE_LOWPOLY_STYLE) {
