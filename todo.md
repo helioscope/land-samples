@@ -1,11 +1,7 @@
 ## Goals: ##
-generate additional ground-cover DONE
-- flowers DONE
-- weedy grasses DONE?
-- rocks DONE
-- sticks (sticking into/out of the ground a bit is probably ok) DONE
 experiment with groundcover optimization
 denser groundcover
+add water spawns (long stalks, large fallen branch, rocks)
 camera controls improvements:
 - auto-rotate until camera control is used, then wait N seconds of no control before moving again, slowly building speed
 - hotkey to reset/recenter (to undo significant panning)
@@ -35,6 +31,9 @@ unity docs: https://docs.unity3d.com/Manual/3D-formats.html#Exported3DFiles
 Ground-cover improvements:
 - grass blades (2-sided triangles -- maybe these should be handled separately, to combine into one mesh while still observing ground height)
 - floating flower hints (low, colorful triangles, roughly parallel to ground -- could double for fallen leaves, & low ground plants -- maybe should handle like grass)
+- mushroom generator
+- dung generator
+- pine-cone generator
 
 Tree improvements:
 - fix trunk overextension?

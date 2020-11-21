@@ -13,7 +13,7 @@ const heightmapCanvas = document.createElement('canvas');
 const heightmapContext = heightmapCanvas.getContext('2d');
 
 const NOISE_OCTAVES = 16;
-const USE_HARD_EDGE_LOWPOLY_STYLE = false;
+const USE_HARD_EDGE_LOWPOLY_STYLE = true;
 
 
 function sampleNoise(x, y) {

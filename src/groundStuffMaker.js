@@ -18,21 +18,21 @@ import {
   randomDistanceVector2FromArray
 } from './util';
 
-const USE_HARD_EDGE_LOWPOLY_STYLE = false;
+const USE_HARD_EDGE_LOWPOLY_STYLE = true;
 
 const defaultMaterial = new THREE.MeshLambertMaterial({vertexColors: THREE.VertexColors, flatShading: USE_HARD_EDGE_LOWPOLY_STYLE});
 const slightlyEmissiveMaterial = new THREE.MeshLambertMaterial({emissive: 0x2F2F2F, vertexColors: THREE.VertexColors, flatShading: USE_HARD_EDGE_LOWPOLY_STYLE});
 
 const defaultFlowerBunchParams = {
   stemColors : [0x00C980],
-  bloomColors : [0xFFFFFF],
-  bloomWidthRange : [0.06, 0.1125],
+  bloomColors : [0xFFFFFF, 0xFFDD00, 0x0000D0, 0xFF7700, 0xFF0088],
+  bloomWidthRange : [0.064, 0.125],
   bloomHeightRange : [0.05, 0.06], // might be better to use an aspect ratio range, so flowers in a bunch are more self-similar
   stemHeightRange : [0.2, 0.5],
   stemWidth : 0.02,
-  countRange : [2,4],
-  separationRange : [0.125, 0.35], // not entirely guaranteed (separation distance is only measured against last location)
-  tiltRange : [RADIANS_FOR_1_DEGREE * -10, RADIANS_FOR_1_DEGREE * 10]
+  countRange : [2,5],
+  separationRange : [0.15, 0.4], // not entirely guaranteed (separation distance is only measured against last location)
+  tiltRange : [RADIANS_FOR_1_DEGREE * -12, RADIANS_FOR_1_DEGREE * 12]
 };
 
 export function makeFlowerBunch(params) {
@@ -87,7 +87,7 @@ function makeFlowerGeometry(params) {
   geometry.merge(bloom);
 
   
-  const stem = new THREE.CylinderGeometry(stemWidth, stemWidth, stemHeight, 3);
+  const stem = new THREE.CylinderGeometry(stemWidth * 0.55, stemWidth, stemHeight, 3);
   stem.translate(0, stemHeight * 0.5, 0);
   stem.rotateY(randomRange(0,RADIANS_FOR_360_DEGREES));
   stem.faces.forEach(f => f.color.set(stemColor));

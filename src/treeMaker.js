@@ -17,7 +17,7 @@ import {
   RADIANS_FOR_270_DEGREES
 } from './util';
 
-const USE_HARD_EDGE_LOWPOLY_STYLE = false;
+const USE_HARD_EDGE_LOWPOLY_STYLE = true;
 
 const defaultTierWidths = [1.4, 2, 2.6];
 const defaultTierYOffsets = [2.2, 1.1, 0];
@@ -125,8 +125,9 @@ export function makeDeadTree() {
 export function makeTreeStump() {
   const geometry = new THREE.Geometry();
   const trunkWidth = randomRangeFromArray(trunkWidthRange);
+  const trunkTaper = randomRangeFromArray([0.85, 1]);
   const trunkHeight = randomRange(0.5,1);
-  const trunk = new THREE.CylinderGeometry(trunkWidth, trunkWidth, trunkHeight, 7);
+  const trunk = new THREE.CylinderGeometry(trunkWidth * trunkTaper, trunkWidth, trunkHeight, 7);
   trunk.translate(0, trunkHeight * 0.45, 0);
   trunk.rotateY(randomRange(0, RADIANS_FOR_360_DEGREES));
   trunk.faces.forEach(f => f.color.set(0x604011));

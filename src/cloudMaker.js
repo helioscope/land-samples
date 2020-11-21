@@ -5,7 +5,7 @@ import * as THREE from 'three';
 
 import {jitterVertices, mushBottom, randomRangeFromArray} from './util';
 
-const USE_HARD_EDGE_LOWPOLY_STYLE = false;
+const USE_HARD_EDGE_LOWPOLY_STYLE = true;
 const cloudMaterial = new THREE.MeshLambertMaterial({
   color: 0xFFFFFF,
   emissive: 0x333333,
