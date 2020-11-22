@@ -1,5 +1,6 @@
 import _ from 'lodash';
 import * as THREE from 'three';
+import Alea from 'alea';
 
 export const RADIANS_FOR_1_DEGREE = Math.PI / 180;
 export const RADIANS_FOR_90_DEGREES = Math.PI * 0.5;
@@ -13,15 +14,19 @@ export const VECTOR2_DOWN = new THREE.Vector2(0,-1);
 export const VECTOR2_LEFT = new THREE.Vector2(-1,0);
 export const VECTOR2_RIGHT = new THREE.Vector2(1,0);
 
-let getRandomValue = Math.random;
+let rand = new Alea();
 
 export function setRandomFunction(newRandomFunction) {
-  getRandomValue = newRandomFunction;
+  rand = newRandomFunction;
+}
+
+export function getRandomValue(scale = 1) {
+  return rand() * scale;
 }
 
 export function randomOdds(chance) {
   // assumes chance is between 0 and 1, so 0.5 is 50% odds
-  return getRandomValue() < chance;
+  return rand() < chance;
 }
 
 export function randomPickOne(optionsArr) {
@@ -40,7 +45,7 @@ export function randomPickMultiple(optionsArr, numPicks) {
 
 export function randomRange(min, max) {
   const range = max - min;
-  return (getRandomValue() * range) + min;
+  return (rand() * range) + min;
 }
 export function randomRangeFromArray(arr) {
   return randomRange(arr[0],arr[1]);
@@ -48,7 +53,7 @@ export function randomRangeFromArray(arr) {
 
 export function randomRangeInt(min, max) {
   const range = max - min + 1; // add 1 to be inclusive of the max value
-  return Math.floor((getRandomValue() * range) + min);
+  return Math.floor((rand() * range) + min);
 }
 export function randomRangeIntFromArray(arr) {
   return randomRangeInt(arr[0],arr[1]);
@@ -84,3 +89,36 @@ export function mushBottom(geometry, bottomY) {
     v.y = Math.max(v.y, bottomY)
   });
 }
+
+export class WeightedOddsPicker {
+  // choice format: {value: 'anything', weight: NUMBER}
+  constructor(choicesArray) {
+    this.totalWeight = 0;
+    this.choices = [];
+
+    _.each(choicesArray, this.addChoice.bind(this));
+  }
+
+  addChoice(choice) {
+    let storedChoice = Object.assign({}, choice);
+    
+    this.totalWeight += choice.weight;
+    storedChoice.upperLimit = this.totalWeight;
+    this.choices.push(storedChoice);
+  }
+
+  pickOne() {
+    let odds = rand() * this.totalWeight;
+    let choices = this.choices;
+    let imax = choices.length;
+    for (let i = 0; i < imax; i++) {
+      let choice = choices[i];
+      if (odds < choice.upperLimit) {
+        return choice.value;
+      }
+    }
+    console.warn("weighted picker odds overran choices? this shouldn't happen! egad!", odds, this.totalWeight);
+    return choices[choices.length - 1].value;
+  }
+}
+

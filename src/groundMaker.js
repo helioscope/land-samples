@@ -170,10 +170,10 @@ export function makeGroundPlane(width, height, seed=undefined) {
         vert.z = remapValue(value, 0,255, 0,7);
 
         // some ideas from the tutorial:
-        // if(vert.z > 2.5) vert.z *= 1.3 //exaggerate the peaks
+        // if(vert.z > 2.5) vert.z *= 1.3; //exaggerate the peaks
         
-        // vert.x += map(Math.random(),0,1,-0.5,0.5) //jitter x
-        // vert.y += map(Math.random(),0,1,-0.5,0.5) //jitter y
+        // vert.x += randomRange(-0.5,0.5); //jitter x
+        // vert.y += randomRange(-0.5,0.5); //jitter y
     }
   }
 

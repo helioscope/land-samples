@@ -1,5 +1,14 @@
 ## Goals: ##
-experiment with groundcover optimization DONE FOR NOW (buffered geometry seems to go a long way)
+
+convert to parametric (& deterministic) generators
+
+start hooking up dat.gui to be able to tweak settings live (especially useful for experimenting with colors)
+
+house generator?
+
+try to build out original game idea for github game off?
+
+
 denser groundcover
 add water spawns (long stalks, large fallen branch, rocks)
 camera controls improvements:
@@ -7,7 +16,6 @@ camera controls improvements:
 - better initial camera position
 increase contrast between stem & grass colors & ground color
 presets for different kinds of dioramas (trees: natural, all dead, heavily deforested, slightly used, everything)
-start hooking up dat.gui to be able to tweak settings live (especially useful for experimenting with colors)
 fix terrain edges (off by one v heightmap texture?)
 extend terrain below (to make a dirt-cube of sorts)
 extend water below (to make a water-cube of sorts)
@@ -18,8 +26,6 @@ butterfly generator
 simple cone-tree generator
 
 ## Ideas: ##
-
-transition towards deterministic generators, increasingly parametric (e.g. trunk height, trunk width, trunk color, leaf color, leafball height, leafball-jitter dist, random seed, scale)
 
 export meshes? 
 obj is supposedly unity-supported: https://github.com/mrdoob/three.js/blob/master/examples/js/exporters/OBJExporter.js

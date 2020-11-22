@@ -2,8 +2,8 @@ import * as THREE from 'three';
 
 import {makeConiferTree, makeDeadTree, makeLollipopTree, makeTreeStump} from './treeMaker';
 import {makeCumulousCloud} from './cloudMaker';
-import { makeGroundPlane, getHeightAt } from './groundMaker';
-import {randomDistanceVector2, randomOdds, randomRange, randomRangeFromArray} from './util';
+import { makeGroundPlane } from './groundMaker';
+import {getRandomValue, randomOdds, randomRange, randomRangeFromArray, WeightedOddsPicker} from './util';
 import { Vector3 } from 'three';
 import { makeFlowerBunch, makeRandomStick, makeRandomRock, makeStalkClump } from './groundStuffMaker';
 
@@ -17,7 +17,9 @@ let groundStuff = [];
 let dioramaGroup = null;
 let treesGroup = null;
 
-const NUM_TREES = 10; // stress test 70x70 hits ~30fps with each tree as separate geometry; switching to buffer geometry raises to ~40fps
+let groundSeed = null;
+
+const NUM_TREES = 10; // stress test 70(x70) hits ~30fps with each tree as separate geometry; switching to buffer geometry raises to ~40fps
 const treeSpawnOddsRange = [0.3, 0.95];
 const cloudSpawnOddsRange = [0.3, 1];
 const NUM_CLOUDS = 5;
@@ -96,10 +98,11 @@ function spawnInGrid(collection, group, spawnFunction, gridSize, separationDista
 }
 
 function createGround() {
+  groundSeed = new Date().toString();
   if (ground) {
     dioramaGroup.remove(ground);
   }
-  ground = makeGroundPlane(NUM_TREES * 4.5, NUM_TREES * 4.5, Math.random());
+  ground = makeGroundPlane(NUM_TREES * 4.5, NUM_TREES * 4.5, groundSeed);
   dioramaGroup.add(ground);
   if (ENABLE_SHADOWS) {
     ground.receiveShadow = true;
@@ -126,15 +129,13 @@ function createWater() {
 
 function createTrees() {
   const removalOdds = 1 - randomRangeFromArray(treeSpawnOddsRange);
-  let randomTreeSpawn = () => {
-    let odds = Math.random();
-    if (odds < 0.1) {
-      return makeTreeStump();
-    } else if (odds < 0.35) {
-      return makeDeadTree();
-    } else {
-      return makeConiferTree();
-    }
+  const spawnPicker = new WeightedOddsPicker([
+    {value : makeTreeStump, weight: 10},
+    {value : makeDeadTree, weight: 25},
+    {value : makeConiferTree, weight: 65},
+  ]);
+  const randomTreeSpawn = () => {
+    return spawnPicker.pickOne()();
   }
   const downVector = new THREE.Vector3(0, -1, 0);
   const raycaster = new THREE.Raycaster( new THREE.Vector3(), downVector, 0.1, 100);
@@ -183,26 +184,23 @@ function createGroundStuff() {
 
   const numObjects = randomRange(45,350);
 
-  let spawnGroundObject = () => {
-    let odds = Math.random();
-    if (odds < 0.50) {
-      return makeStalkClump();
-    } else if (odds < 0.75) {
-      return makeFlowerBunch();
-    } else if (odds < 0.95) {
-      return makeRandomStick();
-    } else {
-      return makeRandomRock();
-    }
+  const groundSpawnPicker = new WeightedOddsPicker([
+    {value : makeStalkClump, weight: 50},
+    {value : makeFlowerBunch, weight: 25},
+    {value : makeRandomStick, weight: 20},
+    {value : makeRandomRock, weight: 5},
+  ]);
+  const spawnGroundObject = () => {
+    return groundSpawnPicker.pickOne()();
   }
 
   let spawnWaterObject = () => {
-    let odds = Math.random();
+    let odds = getRandomValue(100);
     let obj = null;
-    if (odds < 0.50) {
+    if (odds < 50) {
       obj = makeStalkClump();
       obj.scale.y *= 3;
-    } else if (odds < 0.75) {
+    } else if (odds < 75) {
       obj = makeRandomStick();
       obj.scale.multiplyScalar(4);
     } else {
