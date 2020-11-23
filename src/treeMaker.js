@@ -2,7 +2,6 @@
 
 import _ from 'lodash';
 import * as THREE from 'three';
-import { RGBA_ASTC_5x4_Format } from 'three';
 
 import {
   randomRange, 
@@ -13,11 +12,11 @@ import {
   RADIANS_FOR_1_DEGREE, 
   RADIANS_FOR_90_DEGREES, 
   RADIANS_FOR_360_DEGREES, 
-  RADIANS_FOR_180_DEGREES,
-  RADIANS_FOR_270_DEGREES
+  RADIANS_FOR_180_DEGREES
 } from './util';
 
-const USE_HARD_EDGE_LOWPOLY_STYLE = true;
+import {prepRandomSeed, finalizeMesh, USE_HARD_EDGE_LOWPOLY_STYLE} from './generatorUtil';
+
 
 const defaultTierWidths = [1.4, 2, 2.6];
 const defaultTierYOffsets = [2.2, 1.1, 0];

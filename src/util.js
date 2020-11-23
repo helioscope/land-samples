@@ -20,6 +20,22 @@ export function setRandomFunction(newRandomFunction) {
   rand = newRandomFunction;
 }
 
+export function getNewRandomSeed() {
+  return randomRangeInt(0, 99999999); // not very hardcore, but probably fine for our purposes
+}
+
+export function setRandomSeed(seed) {
+  rand = new Alea(seed);
+}
+
+export function exportRandomState() {
+  return rand.exportState();
+}
+
+export function importRandomState(state) {
+  rand = Alea.importState(state);
+}
+
 export function getRandomValue(scale = 1) {
   return rand() * scale;
 }
@@ -81,12 +97,6 @@ export function jitterVertices(geometry, maxDistance){
     v.x += randomRange(-maxDistance, maxDistance),
     v.y += randomRange(-maxDistance, maxDistance),
     v.z += randomRange(-maxDistance, maxDistance)
-  });
-}
-
-export function mushBottom(geometry, bottomY) {
-  _.each(geometry.vertices, (v) => {
-    v.y = Math.max(v.y, bottomY)
   });
 }
 
