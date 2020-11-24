@@ -5,6 +5,7 @@ import * as THREE from 'three';
 import SimplexNoise from 'simplex-noise';
 
 import {RADIANS_FOR_180_DEGREES, RADIANS_FOR_1_DEGREE, RADIANS_FOR_360_DEGREES, randomRange, randomRangeInt, remapValue} from './util';
+import {prepRandomSeed, finalizeMesh, USE_HARD_EDGE_LOWPOLY_STYLE} from './generatorUtil';
 
 
 let noiseSeed = new Date().toString();
@@ -13,7 +14,6 @@ const heightmapCanvas = document.createElement('canvas');
 const heightmapContext = heightmapCanvas.getContext('2d');
 
 const NOISE_OCTAVES = 16;
-const USE_HARD_EDGE_LOWPOLY_STYLE = true;
 
 
 function sampleNoise(x, y) {
@@ -205,23 +205,7 @@ export function makeGroundPlane(width, height, seed=undefined) {
 
   geometry.rotateX(Math.PI/-2);
   
-  geometry.verticesNeedUpdate = true;
-
-  if (USE_HARD_EDGE_LOWPOLY_STYLE) {
-    geometry.computeFlatVertexNormals();
-  } else {
-    geometry.computeVertexNormals();
-  }
-  
-  return new THREE.Mesh(
-    geometry,
-    new THREE.MeshLambertMaterial({
-      // color: 0x004511,
-      vertexColors: THREE.VertexColors,
-      // wireframe: true,
-      flatShading: USE_HARD_EDGE_LOWPOLY_STYLE,
-    })
-  );
+  return finalizeMesh(geometry, makeGroundPlane, {});
 }
 
 export function getHeightAt(x, y) {

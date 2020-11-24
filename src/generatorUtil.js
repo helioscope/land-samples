@@ -3,7 +3,7 @@ import * as THREE from 'three';
 import {getNewRandomSeed, setRandomSeed} from './util';
 
 
-export const USE_HARD_EDGE_LOWPOLY_STYLE = true; // this probably shouldn't live in a util
+export const USE_HARD_EDGE_LOWPOLY_STYLE = false; // this probably shouldn't live in a util
 
 const defaultMaterial = new THREE.MeshLambertMaterial({vertexColors: THREE.VertexColors, flatShading: USE_HARD_EDGE_LOWPOLY_STYLE});
 
@@ -21,7 +21,7 @@ export function prepRandomSeed(params) {
   setRandomSeed(params.seed);
 }
 
-export function finalizeMesh(geometry, generatorFunction, params, material = null) {
+export function finalizeMesh(geometry, generator, params, material = null) {
   geometry.verticesNeedUpdate = true;
   if (USE_HARD_EDGE_LOWPOLY_STYLE) {
     geometry.computeFlatVertexNormals();
@@ -34,7 +34,7 @@ export function finalizeMesh(geometry, generatorFunction, params, material = nul
     material || defaultMaterial
   );
   mesh.userData = {
-    generator : generatorFunction,
+    generator : generator,
     generatorParams : params
   };
 

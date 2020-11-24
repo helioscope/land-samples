@@ -1,12 +1,31 @@
 ## Goals: ##
 
-convert to parametric (& deterministic) generators
+convert to parametric (& deterministic) generators (+ use MeshGenerator)
+- treemaker
+- groundmaker
+-- pass options dict to finalizeMesh to skip the verticesNeedUpdate & generate normals bits, also to indicate other material? incorporate this into the MeshGenerator?
 
-start hooking up dat.gui to be able to tweak settings live (especially useful for experimenting with colors)
+start hooking up dat.gui to be able to tweak settings live (especially useful for experimenting with colors) DONE-ish -- depends on new MeshGenerator class
+
+fix diorama etc to use the new generators
+
+define editor as its own separate thing, whose activation pauses the diorama scene (updates and rendering)?
+
+pick between dat.gui, tweakpane, other alternatives CURRENTLY LEANING TOWARDS DAT.GUI FOR NOW
+- dat.gui's docs are down & it hasn't seen much dev attention, but it works well, has been around for years, and has a nice drag up/down feature for dialing in numbers without resorting to ranges. I think I'll run with this for now, but consider switching later
+- tweakpane's docs, design, & api are lovely, and it seems to be actively developed right now, but it's fairly young and lacks dat.gui's drag up/down feature (it still supports sliders via ranges, though). 
+- quicksettings seems pretty solid, but is not under active development and the design is a bit utilitarian
+- guify i didn't really get around to investigating very far, but it apparently offers an "interval" input (one slider, two thumbs) which might be useful.
+- https://gist.github.com/SMUsamaShah/71d5ac6849cdc0bffff4c19329e9d0bb might have other options worth examining
 
 house generator?
 
 try to build out original game idea for github game off?
+
+known issues:
+- the current use of dat.gui to edit arrays (including ranges) ends up editing all usage of those arrays, since those are passed as references
+  - this probably only affects spawning new meshes from that generator
+- finalizeMesh has some redundant code now, and seems to have high conceptual overlap with MeshGenerator's makeMesh method (while still having its own rigid assumptions)
 
 
 denser groundcover

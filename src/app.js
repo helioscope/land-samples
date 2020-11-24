@@ -1,12 +1,20 @@
 import _ from 'lodash';
 import * as THREE from 'three';
+import * as dat from 'dat.gui';
 
 require('./threejs-extras/OrbitControls');
 
 let controls = null;
 
 import { initDiorama, generateDiorama } from './diorama';
-import { RADIANS_FOR_1_DEGREE } from './util';
+import { RADIANS_FOR_1_DEGREE,randomRangeFromArray,
+  randomRangeIntFromArray,
+  getNewRandomSeed,
+randomPickOne, 
+RADIANS_FOR_180_DEGREES} from './util';
+import { FlowerBunchMaker, makeRock, RockMaker, StalkClumpMaker, StickMaker } from './groundStuffMaker';
+import Tweakpane from 'tweakpane';
+import { WebGLMultisampleRenderTarget } from 'three';
 
 let rootElem = null;
 let renderer= null;
@@ -32,7 +40,7 @@ function init() {
   renderer.setSize( rootElem.clientWidth, rootElem.clientHeight );
   rootElem.appendChild( renderer.domElement );
   
-  dioramaGroup = generateDiorama();
+  // dioramaGroup = generateDiorama();
 
   camera.position.z = 20;
   camera.position.y = 12;
@@ -45,7 +53,8 @@ function init() {
   controls.zoomSpeed = 0.6;
   controls.target.y = 2.5;
 
-  
+  buildGUITest();
+
   animate();
 
   document.addEventListener('keydown', (evt) => {
@@ -55,6 +64,73 @@ function init() {
       controls.reset();
     }
   });
+}
+
+let gui = null;
+function openEditorForGenerator(generator) {
+  if (gui) {
+    gui.destroy();
+  }
+
+  let obj = null;
+  let params = generator.getRandomParams();
+
+  const regenObj = () => {
+    if (obj) {
+      scene.remove(obj);
+    }
+    obj = generator.makeMesh(params);
+    scene.add(obj);
+    return obj;
+  }
+  obj = generator.makeMesh(params);
+  scene.add(obj);
+
+  gui = new dat.GUI({name : "TEST"});
+
+  let actions = {
+    cancel : () => {
+      console.log('todo: cancel');
+    },
+    save : () => {
+      console.log('todo: save');
+    },
+    randomize : () => {
+      Object.assign(params, generator.getRandomParams());
+      regenObj();
+      for (var i in gui.__controllers) {
+        gui.__controllers[i].updateDisplay();
+      }    
+    }
+  };
+
+  gui.add(actions, 'randomize');
+  generator.prepEditorPanel(gui, params, regenObj);
+  gui.add(actions, 'save');
+  gui.add(actions, 'cancel');
+
+  camera.position.z = 5;
+  camera.position.y = 0;
+  controls.target.y = 0; // could set this relative to the mesh bounds, centering it
+  controls.minDistance = 1; // could set this relative to the mesh bounds, making sure we don't accidentally clip through
+  controls.maxPolarAngle = RADIANS_FOR_180_DEGREES;
+}
+
+function buildGUITest() {
+  openEditorForGenerator(RockMaker);
+
+  // gui.add(params, 'size').onChange(regenObj);
+  // gui.addColor(params, 'color').onChange(regenObj);
+  // gui.add(params, 'seed').onChange(regenObj);
+  
+  // const gui = new Tweakpane();
+  // gui.addButton({title : 'randomize'}).on('click', ()=>{console.log('todo: randomize')});
+  // gui.addInput(params, 'size');
+  // gui.addInput(params, 'color', {input: 'color'});
+  // gui.addInput(params, 'seed');
+  // gui.addButton({title : 'save'}).on('click', ()=>{console.log('todo: save changes')});
+  // gui.addButton({title : 'cancel'}).on('click', ()=>{console.log('todo: close window')});
+  // gui.on('change', regenObj);
 }
 
 function animate() {

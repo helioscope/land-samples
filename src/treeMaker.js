@@ -110,9 +110,11 @@ export function makeDeadTree() {
   geometry.rotateX(randomRange(0, 15 * RADIANS_FOR_1_DEGREE));
   geometry.rotateY(randomRange(0, 6 * RADIANS_FOR_360_DEGREES));
 
+  geometry.verticesNeedUpdate = true;
   if (USE_HARD_EDGE_LOWPOLY_STYLE) {
-    geometry.verticesNeedUpdate = true;
     geometry.computeFlatVertexNormals();
+  } else {
+    geometry.computeFaceNormals();
   }
 
   return new THREE.Mesh(
