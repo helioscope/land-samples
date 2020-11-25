@@ -15,6 +15,7 @@ RADIANS_FOR_180_DEGREES} from './util';
 import { FlowerBunchMaker, makeRock, RockMaker, StalkClumpMaker, StickMaker } from './groundStuffMaker';
 import Tweakpane from 'tweakpane';
 import { WebGLMultisampleRenderTarget } from 'three';
+import { CumulousCloudMaker } from './cloudMaker';
 
 let rootElem = null;
 let renderer= null;
@@ -117,7 +118,7 @@ function openEditorForGenerator(generator) {
 }
 
 function buildGUITest() {
-  openEditorForGenerator(RockMaker);
+  openEditorForGenerator(CumulousCloudMaker);
 
   // gui.add(params, 'size').onChange(regenObj);
   // gui.addColor(params, 'color').onChange(regenObj);

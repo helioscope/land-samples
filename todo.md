@@ -15,8 +15,10 @@ pick between dat.gui, tweakpane, other alternatives CURRENTLY LEANING TOWARDS DA
 - dat.gui's docs are down & it hasn't seen much dev attention, but it works well, has been around for years, and has a nice drag up/down feature for dialing in numbers without resorting to ranges. I think I'll run with this for now, but consider switching later
 - tweakpane's docs, design, & api are lovely, and it seems to be actively developed right now, but it's fairly young and lacks dat.gui's drag up/down feature (it still supports sliders via ranges, though). 
 - quicksettings seems pretty solid, but is not under active development and the design is a bit utilitarian
-- guify i didn't really get around to investigating very far, but it apparently offers an "interval" input (one slider, two thumbs) which might be useful.
+- guify i didn't really get around to investigating very far, but it apparently offers an "interval" input (i.e. set min & max on one input) and logarithmic slider which might be useful.
 - https://gist.github.com/SMUsamaShah/71d5ac6849cdc0bffff4c19329e9d0bb might have other options worth examining
+
+click on mesh to open editor & tweak its params?
 
 house generator?
 
@@ -25,7 +27,7 @@ try to build out original game idea for github game off?
 known issues:
 - the current use of dat.gui to edit arrays (including ranges) ends up editing all usage of those arrays, since those are passed as references
   - this probably only affects spawning new meshes from that generator
-- finalizeMesh has some redundant code now, and seems to have high conceptual overlap with MeshGenerator's makeMesh method (while still having its own rigid assumptions)
+- finalizeMesh has some redundant code now, and seems to have conceptual overlap with MeshGenerator's makeMesh method (while still having its own rigid assumptions)
 
 
 denser groundcover
