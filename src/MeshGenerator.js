@@ -136,6 +136,12 @@ export class MeshGenerator {
         folder.add(param.value, 0).name('min').onChange(updateHandler);
         folder.add(param.value, 1).name('max').onChange(updateHandler);
         folder.open();
+      } else if (param.type == 'array:number') { 
+        let folder = pane.addFolder(paramName);
+        _.each(param.value, (val, index) => {
+          folder.add(param.value, index).name(index.toString()).onChange(updateHandler);
+        });
+        folder.open();
       } else if (param.type == 'options:color') { 
         let folder = pane.addFolder(paramName);
         _.each(param.value, (val, index) => {
