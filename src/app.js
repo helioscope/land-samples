@@ -16,6 +16,7 @@ import { FlowerBunchMaker, makeRock, RockMaker, StalkClumpMaker, StickMaker } fr
 import Tweakpane from 'tweakpane';
 import { WebGLMultisampleRenderTarget } from 'three';
 import { CumulousCloudMaker } from './cloudMaker';
+import { ConiferMaker, DeadTreeMaker, LollipopTreeMaker, TreeStumpMaker } from './treeMaker';
 
 let rootElem = null;
 let renderer= null;
@@ -118,7 +119,7 @@ function openEditorForGenerator(generator) {
 }
 
 function buildGUITest() {
-  openEditorForGenerator(CumulousCloudMaker);
+  openEditorForGenerator(ConiferMaker);
 
   // gui.add(params, 'size').onChange(regenObj);
   // gui.addColor(params, 'color').onChange(regenObj);
