@@ -3,7 +3,7 @@ import * as THREE from 'three';
 import {getNewRandomSeed, setRandomSeed} from './util';
 
 
-export const USE_HARD_EDGE_LOWPOLY_STYLE = false; // this probably shouldn't live in a util
+export const USE_HARD_EDGE_LOWPOLY_STYLE = true; // this probably shouldn't live in a util
 
 const defaultMaterial = new THREE.MeshLambertMaterial({vertexColors: THREE.VertexColors, flatShading: USE_HARD_EDGE_LOWPOLY_STYLE});
 
