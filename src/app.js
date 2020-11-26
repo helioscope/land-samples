@@ -7,14 +7,9 @@ require('./threejs-extras/OrbitControls');
 let controls = null;
 
 import { initDiorama, generateDiorama } from './diorama';
-import { RADIANS_FOR_1_DEGREE,randomRangeFromArray,
-  randomRangeIntFromArray,
-  getNewRandomSeed,
-randomPickOne, 
-RADIANS_FOR_180_DEGREES} from './util';
+import { RADIANS_FOR_1_DEGREE, RADIANS_FOR_180_DEGREES} from './util';
 import { FlowerBunchMaker, makeRock, RockMaker, StalkClumpMaker, StickMaker } from './groundStuffMaker';
 import Tweakpane from 'tweakpane';
-import { WebGLMultisampleRenderTarget } from 'three';
 import { CumulousCloudMaker } from './cloudMaker';
 import { ConiferMaker, DeadTreeMaker, LollipopTreeMaker, TreeStumpMaker } from './treeMaker';
 
@@ -113,26 +108,14 @@ function openEditorForGenerator(generator) {
 
   camera.position.z = 5;
   camera.position.y = 0;
-  controls.target.y = 0; // could set this relative to the mesh bounds, centering it
+  obj.geometry.computeBoundingBox();
+  controls.target.y = obj.geometry.boundingBox.getCenter().y; // could set this relative to the mesh bounds, centering it
   controls.minDistance = 1; // could set this relative to the mesh bounds, making sure we don't accidentally clip through
   controls.maxPolarAngle = RADIANS_FOR_180_DEGREES;
 }
 
 function buildGUITest() {
   openEditorForGenerator(ConiferMaker);
-
-  // gui.add(params, 'size').onChange(regenObj);
-  // gui.addColor(params, 'color').onChange(regenObj);
-  // gui.add(params, 'seed').onChange(regenObj);
-  
-  // const gui = new Tweakpane();
-  // gui.addButton({title : 'randomize'}).on('click', ()=>{console.log('todo: randomize')});
-  // gui.addInput(params, 'size');
-  // gui.addInput(params, 'color', {input: 'color'});
-  // gui.addInput(params, 'seed');
-  // gui.addButton({title : 'save'}).on('click', ()=>{console.log('todo: save changes')});
-  // gui.addButton({title : 'cancel'}).on('click', ()=>{console.log('todo: close window')});
-  // gui.on('change', regenObj);
 }
 
 function animate() {
