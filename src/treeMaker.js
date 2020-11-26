@@ -155,10 +155,10 @@ export const ConiferMaker = new MeshGenerator({
   generatorParams : {
     trunkWidth : { range : [0.2, 0.35] },
     trunkHeight : { range : [1.5, 2.8] },
-    trunkColor : { options : [0x604011], type : 'color' },
-    leafColor : { options : [0x008022], type : 'color'},
-    leafTierWidths : { value : [1.4, 2, 2.6], type : 'array:number'},
-    leafTierYOffsets : { value : [2.2, 1.1, 0], type : 'array:number' },
+    trunkColor : { options : [0x604011, 0x4d3616], type : 'color' },
+    leafColor : { options : [0x008022, 0xa7052], type : 'color'},
+    leafTierWidths : { value : [1.4, 2, 2.6], type : 'array:number'}, // 2.6 / 2 = 1.3; 2 / 1.4 = 1.4285714286 (rounded), so maybe tierScaleFactor is ~1.4?
+    leafTierYOffsets : { value : [2.2, 1.1, 0], type : 'array:number' }, // tier spacing factor is 1.1?
     leafWidthScale : { range : [0.5, 0.9] },
     tierYOffsetVariation : { value : [0, 0.25], type : 'range' },
     tierScaleOffsetVariation : { value : [-0.125, 0.125], type : 'range' },
