@@ -15,21 +15,24 @@ import {
   finalizeMesh
 } from './generatorUtil';
 import {MeshGenerator} from './MeshGenerator';
+import { Vector3 } from 'three';
 
 
-function sproutGeometryClump(parentGeometry, clumpParams, getObjectParams) {
+function addGeometryClump(parentGeometry, clumpParams, getObjectParams) {
   const numObjects = clumpParams.count;
   const spawnFunc = clumpParams.spawnFunction;
   let baseOffset = new THREE.Vector3();
+  let offsetFactor = 0; // skip the first offset
   for (let i = 0; i < numObjects; i++) {
     const objectParams = getObjectParams(i);
     const sprout = spawnFunc(objectParams);
-    let nextOffset = randomDistanceVector2FromArray(clumpParams.separationRange);
+    let nextOffset = randomDistanceVector2FromArray(clumpParams.separationRange).multiplyScalar(offsetFactor);
     baseOffset = baseOffset.add(new THREE.Vector3(nextOffset.x, 0, nextOffset.y));
     sprout.rotateX(randomRangeFromArray(clumpParams.tiltRange));
     sprout.rotateY(randomRange(0, RADIANS_FOR_360_DEGREES));
     sprout.translate(baseOffset.x, 0, baseOffset.z);
     parentGeometry.merge(sprout);
+    offsetFactor = 1; // don't skip other offsets
   }
 }
 
@@ -56,7 +59,7 @@ export const FlowerBunchMaker = new MeshGenerator({
       stemWidth : params.stemWidth
     };
     
-    sproutGeometryClump(geometry, {
+    addGeometryClump(geometry, {
       count : params.count,
       separationRange : params.separationRange,
       spawnFunction : makeFlowerGeometry,
@@ -114,7 +117,7 @@ export const StalkClumpMaker = new MeshGenerator({
   },
   generatorFunction : (params) => {
     let geometry = new THREE.Geometry();
-    sproutGeometryClump(geometry, {
+    addGeometryClump(geometry, {
       count : params.count,
       separationRange : params.separationRange,
       tiltRange : params.tiltRange,
