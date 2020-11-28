@@ -84,6 +84,7 @@ export const DeadTreeMaker = new MeshGenerator({
     const trunkHeight = params.trunkHeight;
     const trunkColor = params.trunkColor;
     const trunk = new THREE.CylinderGeometry(trunkWidth * 0.5, trunkWidth, trunkHeight, 5);
+    const facingAngle = randomRange(0, RADIANS_FOR_360_DEGREES);
     trunk.translate(0, trunkHeight * 0.5, 0);
     trunk.faces.forEach(f => f.color.set(trunkColor));
     geometry.merge(trunk);
@@ -122,8 +123,8 @@ export const DeadTreeMaker = new MeshGenerator({
 
     const finalScale = params.finalScale;
     geometry.scale(finalScale, finalScale, finalScale);
-    geometry.rotateX(randomRange(0, params.tilt * RADIANS_FOR_1_DEGREE));
-    geometry.rotateY(randomRange(0, RADIANS_FOR_360_DEGREES));
+    geometry.rotateX(params.tilt * RADIANS_FOR_1_DEGREE);
+    geometry.rotateY(facingAngle);
 
     return finalizeMesh(geometry, this, params);
   }
