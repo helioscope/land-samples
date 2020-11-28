@@ -15,7 +15,6 @@ import {
   finalizeMesh
 } from './generatorUtil';
 import {MeshGenerator} from './MeshGenerator';
-import { Vector3 } from 'three';
 
 
 function addGeometryClump(parentGeometry, clumpParams, getObjectParams) {
@@ -23,12 +22,15 @@ function addGeometryClump(parentGeometry, clumpParams, getObjectParams) {
   const spawnFunc = clumpParams.spawnFunction;
   let baseOffset = new THREE.Vector3();
   let offsetFactor = 0; // skip the first offset
+  let tiltRange = [clumpParams.tiltRange[0] * RADIANS_FOR_1_DEGREE, clumpParams.tiltRange[1] * RADIANS_FOR_1_DEGREE];
+  let separationRange = clumpParams.separationRange;
+  
   for (let i = 0; i < numObjects; i++) {
     const objectParams = getObjectParams(i);
     const sprout = spawnFunc(objectParams);
-    let nextOffset = randomDistanceVector2FromArray(clumpParams.separationRange).multiplyScalar(offsetFactor);
+    let nextOffset = randomDistanceVector2FromArray(separationRange).multiplyScalar(offsetFactor);
     baseOffset = baseOffset.add(new THREE.Vector3(nextOffset.x, 0, nextOffset.y));
-    sprout.rotateX(randomRangeFromArray(clumpParams.tiltRange));
+    sprout.rotateX(randomRangeFromArray(tiltRange));
     sprout.rotateY(randomRange(0, RADIANS_FOR_360_DEGREES));
     sprout.translate(baseOffset.x, 0, baseOffset.z);
     parentGeometry.merge(sprout);
@@ -41,7 +43,7 @@ export const FlowerBunchMaker = new MeshGenerator({
   generatorParams : {
     count : { range : [2,5], type : 'int'},
     separationRange : { value : [0.18, 0.4], type: 'range' },
-    tiltRange : { value : [RADIANS_FOR_1_DEGREE * -12, RADIANS_FOR_1_DEGREE * 12], type: 'range'},
+    tiltRange : { value : [-12, 12], type: 'range'},
     stemHeightRange : { value : [0.25, 0.5], type: 'range'}, 
     stemWidth : { value : 0.02 },
     stemTaper : { value : 0.55 }, // taper factor -- 1 = no tapering toward the top, 0 = taper into a point at the top
@@ -111,7 +113,7 @@ export const StalkClumpMaker = new MeshGenerator({
     heightRange : { value : [0.15, 0.7], type: 'range'}, 
     taperRange : { value : [0.25, 0.6], type: 'range'}, // taper factor -- 1 = no tapering toward the top, 0 = taper into a point at the top
     separationRange : { value : [0.2, 0.4], type: 'range' },
-    tiltRange : { value : [RADIANS_FOR_1_DEGREE * -24, RADIANS_FOR_1_DEGREE * 24], type: 'range'},
+    tiltRange : { value : [-24, 24], type: 'range'},
     colors : {value : [0x118840, 0x337540], type: 'options:color'}, // not supported. should this be type : 'options:color'?
     seed : {type : 'seed'} // if not provided, will auto-generate
   },
@@ -143,7 +145,7 @@ function makeStalkGeometry(params) {
   const stalkColor = params.stalkColor;
   const stalk = new THREE.CylinderGeometry(stalkWidth * params.taperFactor, stalkWidth, stalkHeight, 3);
   stalk.translate(0, stalkHeight * 0.5, 0);
-  stalk.rotateY(randomRange(0,RADIANS_FOR_360_DEGREES));
+  stalk.rotateY(randomRange(0, RADIANS_FOR_360_DEGREES));
   stalk.faces.forEach(f => f.color.set(stalkColor));
 
   return stalk;
@@ -152,12 +154,12 @@ function makeStalkGeometry(params) {
 
 export const StickMaker = new MeshGenerator({
   generatorParams : {
-    color : {options : [0x5F4030], type : 'color'},
+    color : {options : [0x5F4030, 0x573f1e, 0x342c23, 0x373330], type : 'color'},
     length : { range : [0.24, 1.05] },
     width : { range : [0.03, 0.07] },
     taperFactor : { range : [0.25,0.95] },
     jitterDistance : { value : 0.023 },
-    angle : {range : [RADIANS_FOR_1_DEGREE * 70, RADIANS_FOR_1_DEGREE * 100]},
+    angle : {range : [70, 100]},
     seed : {type : 'seed'}
   },
   generatorFunction : (params) => {
@@ -169,7 +171,7 @@ export const StickMaker = new MeshGenerator({
     const stick = new THREE.CylinderGeometry(width * params.taperFactor, width, length, 3, 2);
     jitterVertices(stick, params.jitterDistance);
     stick.translate(0, length * 0.5, 0);
-    stick.rotateX(params.angle);
+    stick.rotateX(params.angle * RADIANS_FOR_1_DEGREE);
     stick.rotateY(facingAngle);
     stick.faces.forEach(f => f.color.set(color));
 
@@ -187,19 +189,19 @@ export const RockMaker = new MeshGenerator({
     color: { options : [0x888888, 0x777777, 0x897252, 0x6f786f], type : 'color' },
     heightScale : { range : [0.3, 1.1] },
     widthScale : { range : [0.45, 1] },
-    tilt : { range : [-10 * RADIANS_FOR_1_DEGREE, 10 * RADIANS_FOR_1_DEGREE] },
+    tilt : { range : [-10, 10] },
     seed: { type : 'seed' },
   },
   generatorFunction : (params) => {
     const geometry = new THREE.Geometry();
     const rock = new THREE.SphereGeometry(params.size, params.widthSegments, params.heightSegments);
     const color = params.color;
-    const facingAngle = randomRange(0,RADIANS_FOR_360_DEGREES);
+    const facingAngle = randomRange(0, RADIANS_FOR_360_DEGREES);
 
     jitterVertices(rock, params.jitterDistance);
     
     rock.scale(params.widthScale, params.heightScale, 1);
-    rock.rotateZ(params.tilt);
+    rock.rotateZ(params.tilt * RADIANS_FOR_1_DEGREE);
     rock.rotateY(facingAngle);
     rock.faces.forEach(f => f.color.set(color));
 
