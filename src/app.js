@@ -1,7 +1,8 @@
 import _ from 'lodash';
-import * as THREE from 'three';
 
 import DioramaViewer from './DioramaViewer';
+import GeneratedMeshEditor from './GeneratedMeshEditor';
+import { DeadTreeMaker } from './treeMaker';
 
 const MODE = {
   INIT : 'initializing',
@@ -11,9 +12,11 @@ const MODE = {
 let mode = MODE.INIT;
 
 function init() {
-  DioramaViewer.init();
-  mode = MODE.DIORAMA;
-  DioramaViewer.focus();
+  // DioramaViewer.init();
+  // mode = MODE.DIORAMA;
+  // DioramaViewer.focus();
+  GeneratedMeshEditor.init();
+  GeneratedMeshEditor.openEditorForGenerator(DeadTreeMaker);
 }
 
 export default {init};

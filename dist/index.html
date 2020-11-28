@@ -19,13 +19,23 @@
         width: 480px;
         height: 360px;
         border: solid black;
+        position: relative;
+      }
+      #mesh-editor {
+        width: 480px;
+        height: 360px;
+        position: absolute;
+        left: 0;
+        top: 0;
       }
     </style>
   </head>
   <body>
     <script src="main.js"></script>
     <div id="outer-container">
-      <div id="app-root"></div>
+      <div id="app-root">
+        <div id="mesh-editor"></div>
+      </div>
     </div>
   </body>
 </html>

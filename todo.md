@@ -1,15 +1,29 @@
 ## Goals: ##
 
 convert to parametric (& deterministic) generators (+ use MeshGenerator)
-- treemaker
 - groundmaker
 -- pass options dict to finalizeMesh to skip the verticesNeedUpdate & generate normals bits, also to indicate other material? incorporate this into the MeshGenerator?
 
-start hooking up dat.gui to be able to tweak settings live (especially useful for experimenting with colors) DONE-ish -- depends on new MeshGenerator class
+define editor as its own separate thing, whose activation pauses the diorama scene (updates and rendering)?
+- separate out the editor into its own file DONE
+- add wireframe base plane DONE
+- add x y and z lines through origin DONE
+- add human figure stand-in (maybe just a cone + ball, about 2m tall)? PASS for now
+- editor has own scene, camera, controls, canvas DONE
+- editor can be opened for a generator KINDA DONE or for a given mesh (code-wise -- the in-diorama raycasting is still to be tested)
+- editor can be overlayed in corner?
+
+make 'seed' parameter added by default -- no need to define it every time?
+revise all angle parameters to use degrees (and just multiply to get radians)
+
+clone params when assigning them to the mesh's userdata
+
+start hooking up dat.gui to be able to tweak settings live - DONE for meshes (just use MeshGenerator)
+setup groundmaker for dat.gui handling
 
 fix diorama etc to use the new generators
 
-define editor as its own separate thing, whose activation pauses the diorama scene (updates and rendering)?
+in-diorama raycasting is still to be tested
 
 pick between dat.gui, tweakpane, other alternatives CURRENTLY LEANING TOWARDS DAT.GUI FOR NOW
 - dat.gui's docs are down & it hasn't seen much dev attention, but it works well, has been around for years, and has a nice drag up/down feature for dialing in numbers without resorting to ranges. I think I'll run with this for now, but consider switching later
@@ -62,10 +76,8 @@ Ground-cover improvements:
 - pine-cone generator
 
 Tree improvements:
-- fix trunk overextension?
-- tree color variation (ideally, interpolate between a few different colors -- can use THREE.Color.lerp, or define gradient)
-- dead tree generator DONE
 - simple cone-tree generator
+- tree color variation (ideally, interpolate between a few different colors -- can use THREE.Color.lerp with a color array (use adjacent colors), or define gradient)
 
 Cloud improvements:
 - cloud Y-squash options?
