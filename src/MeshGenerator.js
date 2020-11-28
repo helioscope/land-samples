@@ -1,30 +1,4 @@
 /*
-planning usage: 
-
-let meshParams = TreeStumpMaker.getRandomParams();
-// or: let meshParams = TreeStumpMaker.getRandomParams(randomizationParams); // based on generator params, e.g. {size : {range: [0,1]}}
-let mesh = TreeStumpMaker.makeMesh(meshParams);
-// or: let mesh = TreeStumpMaker.makeRandomMesh();
-methods:
-getRandomParams(randomizationParams)
-makeMesh(params)
-makeRandomMesh(randomizationParams)
-prepEditorPanel
-
-TreeStumpMaker = new MeshGenerator({
-  generatorParams : {
-    jitterDist : {value : 0.1},                                 // 'number' type (default) not randomized
-    size : {range : [0.5, 2]},                                  // 'number' type (default), using randomRange ('range' is present)
-    color : {options : [0xFFFFFF, 0x000000], type: 'color'}     // 'color' type (specified), using randomPickOne ('options' is present)
-    segments : {range : [2,7], type: 'int'},                    // 'int' type (specified), using randomPickInt ('int' type and 'range' is present)
-    facingAngle : {range : [0,RADIAN_360], hidden: true}        // hidden from editor
-    seed : {type : 'seed'}                                      // 'seed' type (specified), using getNewRandomSeed (due to type)
-  },
-  generatorFunction : (params) => {
-    return geometry;
-  }
-});
-
 goals: 
 - less randomization code
 - readable parameters
@@ -32,7 +6,7 @@ goals:
 - less repeated code (extending default params with provided params, handling seeds)
 - simple interface, so can experiment without necessarily using MeshGenerator (still learning, so let's not paint ourselves into a corner)
 
-should also 
+should also:
 - be flexible enough to handle customized randomization methods (`{randomizer: (propertyName, currentParams)=>{}}`?)
 - be flexible enough to handle custom editor handling (`{type: 'custom', editorSetup: ()=>{}}`, ?)
 - able to accept randomization params for different kinda of random variations (e.g. generate only younger-looking trees for new growth)
@@ -117,7 +91,7 @@ export class MeshGenerator {
     
     mesh.userData = {
       generator : this,
-      params : generatorParams
+      params : _.cloneDeep(generatorParams)
     };
 
     return mesh;
