@@ -1,11 +1,11 @@
 import * as THREE from 'three';
 
-import {makeConiferTree, makeDeadTree, makeLollipopTree, makeTreeStump} from './treeMaker';
-import {makeCumulousCloud} from './cloudMaker';
+import {ConiferMaker, DeadTreeMaker, TreeStumpMaker} from './treeMaker';
+import {CumulousCloudMaker} from './cloudMaker';
 import { makeGroundPlane } from './groundMaker';
 import {getRandomValue, randomOdds, randomRange, randomRangeFromArray, WeightedOddsPicker} from './util';
 import { Vector3 } from 'three';
-import { makeFlowerBunch, makeRandomStick, makeRandomRock, makeStalkClump } from './groundStuffMaker';
+import { FlowerBunchMaker, StickMaker, RockMaker, StalkClumpMaker } from './groundStuffMaker';
 
 
 let light = null;
@@ -61,7 +61,7 @@ export function prepLighting(renderer) {
   dioramaGroup.add(light.target);
 }
 
-export function generateDiorama() {
+export function generateFullDiorama() {
   createGround();
   createWater();
   createTrees();
@@ -80,11 +80,11 @@ function cleanUpObjects(collection, group) {
   }
 }
 
-function spawnInGrid(collection, group, spawnFunction, gridSize, separationDistance, postSpawnFunction = _.noop) {
+function spawnInGrid(collection, group, meshGenerator, gridSize, separationDistance, postSpawnFunction = _.noop) {
   cleanUpObjects(collection, group);
   for (let x = 0; x < gridSize; x++) {
     for (let y = 0; y < gridSize; y++) {
-      let item = spawnFunction();
+      let item = meshGenerator();
       item.position.x = x * separationDistance - (separationDistance * (gridSize - 1) / 2);
       item.position.z = y * separationDistance - (separationDistance * (gridSize - 1) / 2);
       group.add(item);
@@ -130,16 +130,16 @@ function createWater() {
 function createTrees() {
   const removalOdds = 1 - randomRangeFromArray(treeSpawnOddsRange);
   const spawnPicker = new WeightedOddsPicker([
-    {value : makeTreeStump, weight: 10},
-    {value : makeDeadTree, weight: 25},
-    {value : makeConiferTree, weight: 65},
+    {value : TreeStumpMaker, weight: 10},
+    {value : DeadTreeMaker, weight: 25},
+    {value : ConiferMaker, weight: 65},
   ]);
-  const randomTreeSpawn = () => {
-    return spawnPicker.pickOne()();
+  const randomTreeGenerator = () => {
+    return spawnPicker.pickOne().makeRandomMesh();
   }
   const downVector = new THREE.Vector3(0, -1, 0);
-  const raycaster = new THREE.Raycaster( new THREE.Vector3(), downVector, 0.1, 100);
-  spawnInGrid(trees, treesGroup, randomTreeSpawn, NUM_TREES, 4.5, (tree) => {
+  const raycaster = new THREE.Raycaster( new THREE.Vector3(), downVector, 0.1, 100 );
+  spawnInGrid(trees, treesGroup, randomTreeGenerator, NUM_TREES, 4.5, (tree) => {
     if (randomOdds(removalOdds)) {
       treesGroup.remove(tree);
       return;
@@ -180,31 +180,31 @@ function createGroundStuff() {
   const zBounds = [nearBound, farBound];
 
   const downVector = new THREE.Vector3(0, -1, 0);
-  const raycaster = new THREE.Raycaster( new THREE.Vector3(), downVector, 0.1, 100);
+  const raycaster = new THREE.Raycaster( new THREE.Vector3(), downVector, 0.1, 100 );
 
   const numObjects = randomRange(45,350);
 
   const groundSpawnPicker = new WeightedOddsPicker([
-    {value : makeStalkClump, weight: 50},
-    {value : makeFlowerBunch, weight: 25},
-    {value : makeRandomStick, weight: 20},
-    {value : makeRandomRock, weight: 5},
+    {value : StalkClumpMaker, weight: 50},
+    {value : FlowerBunchMaker, weight: 25},
+    {value : StickMaker, weight: 20},
+    {value : RockMaker, weight: 5},
   ]);
   const spawnGroundObject = () => {
-    return groundSpawnPicker.pickOne()();
+    return groundSpawnPicker.pickOne().makeRandomMesh();
   }
 
   let spawnWaterObject = () => {
     let odds = getRandomValue(100);
     let obj = null;
     if (odds < 50) {
-      obj = makeStalkClump();
+      obj = StalkClumpMaker.makeRandomMesh();
       obj.scale.y *= 3;
     } else if (odds < 75) {
-      obj = makeRandomStick();
+      obj = StickMaker.makeRandomMesh();
       obj.scale.multiplyScalar(4);
     } else {
-      obj = makeRandomRock();
+      obj = RockMaker.makeRandomMesh();
     }
     return obj;
   }
@@ -242,7 +242,7 @@ function createGroundStuff() {
 
 function createClouds() {
   const removalOdds = 1 - randomRangeFromArray(cloudSpawnOddsRange);
-  spawnInGrid(clouds, dioramaGroup, makeCumulousCloud, NUM_CLOUDS, 14, (cloud) => {
+  spawnInGrid(clouds, dioramaGroup, CumulousCloudMaker.makeRandomMesh.bind(CumulousCloudMaker), NUM_CLOUDS, 14, (cloud) => {
     if (randomOdds(removalOdds)) {
       dioramaGroup.remove(cloud);
       return;
