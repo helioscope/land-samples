@@ -16,17 +16,17 @@ define editor as its own separate thing, whose activation pauses the diorama sce
 make 'seed' parameter added by default -- no need to define it every time?
 revise all angle parameters to use degrees (and just multiply to get radians)
 
-clone params when assigning them to the mesh's userdata
+clone params when assigning them to the mesh's userdata DONE
 
 start hooking up dat.gui to be able to tweak settings live - DONE for meshes (just use MeshGenerator)
 setup groundmaker for dat.gui handling
 
-fix diorama etc to use the new generators
+fix diorama etc to use the new generators DONE
 
 in-diorama raycasting is still to be tested
 
 pick between dat.gui, tweakpane, other alternatives CURRENTLY LEANING TOWARDS DAT.GUI FOR NOW
-- dat.gui's docs are down & it hasn't seen much dev attention, but it works well, has been around for years, and has a nice drag up/down feature for dialing in numbers without resorting to ranges. I think I'll run with this for now, but consider switching later
+- dat.gui's docs are down & it hasn't seen much dev attention, but it works well, has been around for years, and has a nice drag up/down feature for dialing in numbers without resorting to ranges (which kinda restrict you to stay within said ranges). I think I'll run with this for now, but consider switching later
 - tweakpane's docs, design, & api are lovely, and it seems to be actively developed right now, but it's fairly young and lacks dat.gui's drag up/down feature (it still supports sliders via ranges, though). 
 - quicksettings seems pretty solid, but is not under active development and the design is a bit utilitarian
 - guify i didn't really get around to investigating very far, but it apparently offers an "interval" input (i.e. set min & max on one input) and logarithmic slider which might be useful.

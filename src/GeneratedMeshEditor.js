@@ -6,9 +6,7 @@ require('./threejs-extras/OrbitControls');
 
 let orbitControls = null;
 
-import { initDiorama, generateDiorama } from './diorama';
-import { RADIANS_FOR_1_DEGREE, RADIANS_FOR_180_DEGREES, RADIANS_FOR_90_DEGREES} from './util';
-import { Vector3 } from 'three';
+import { RADIANS_FOR_180_DEGREES, RADIANS_FOR_90_DEGREES} from './util';
 
 let rootElem = null;
 let renderer= null;
@@ -16,6 +14,8 @@ let scene = null;
 let camera = null;
 let clock = null;
 let gui = null;
+
+let thisIsOpen = false;
 
 const axisReferenceLength = 2;
 const xAxisColor = 0xFF0000;
@@ -37,8 +37,6 @@ function init() {
   camera = new THREE.PerspectiveCamera(initialFOV, aspectRatio, 0.1, 1000);
   scene = new THREE.Scene();
   clock = new THREE.Clock();
-  
-  initDiorama(scene, renderer);
 
   renderer.setSize( rootElem.clientWidth, rootElem.clientHeight );
   rootElem.appendChild( renderer.domElement );
@@ -74,7 +72,9 @@ function init() {
   orbitControls.minDistance = 2;
   orbitControls.zoomSpeed = 0.6;
 
-  animate();
+  close();
+
+  // animate();
 
   // document.addEventListener('keydown', (evt) => {
   //   if (evt.key == 'r') {
@@ -86,9 +86,25 @@ function init() {
 }
 
 function animate() {
+  if (!thisIsOpen) {
+    return;
+  }
   requestAnimationFrame( animate );
   orbitControls.update();
   renderer.render( scene, camera );
+}
+
+function open() {
+  thisIsOpen = true;
+  // rootElem.style.pointerEvents = "";
+  rootElem.style.display = "block";
+  animate();
+}
+
+function close() {
+  thisIsOpen = false;
+  rootElem.style.display = "none";
+  // rootElem.style.pointerEvents = "none";
 }
 
 export function openEditorForGenerator(generator) {
@@ -110,7 +126,7 @@ export function openEditorForGenerator(generator) {
   obj = generator.makeMesh(params);
   scene.add(obj);
 
-  gui = new dat.GUI({name : "TEST"});
+  gui = new dat.GUI();
 
   let actions = {
     cancel : () => {
@@ -130,8 +146,8 @@ export function openEditorForGenerator(generator) {
 
   gui.add(actions, 'randomize');
   generator.prepEditorPanel(gui, params, regenObj);
-  gui.add(actions, 'save');
-  gui.add(actions, 'cancel');
+  // gui.add(actions, 'save');
+  // gui.add(actions, 'cancel');
 
   camera.position.z = 5;
   camera.position.y = 2;
@@ -139,6 +155,8 @@ export function openEditorForGenerator(generator) {
   orbitControls.target.y = obj.geometry.boundingBox.getCenter().y; // could set this relative to the mesh bounds, centering it
   orbitControls.minDistance = 1; // could set this relative to the mesh bounds, making sure we don't accidentally clip through
   orbitControls.maxPolarAngle = RADIANS_FOR_180_DEGREES;
+
+  open();
 }
 
-export default {init, openEditorForGenerator};
+export default {init, openEditorForGenerator, open, close};

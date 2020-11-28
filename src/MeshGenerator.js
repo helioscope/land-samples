@@ -75,7 +75,7 @@ export class MeshGenerator {
     _.each(this.generatorParams, (param, paramName) => {
       paramsOut[paramName] = this.getRandomizerFunction(param)(param, paramName, this.generatorParams); // todo: cache functions? revise how this works?
     });
-    return paramsOut;
+    return _.cloneDeep(paramsOut);
   }
 
   makeRandomMesh() {

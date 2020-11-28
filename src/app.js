@@ -12,11 +12,11 @@ const MODE = {
 let mode = MODE.INIT;
 
 function init() {
-  // DioramaViewer.init();
-  // mode = MODE.DIORAMA;
-  // DioramaViewer.focus();
+  DioramaViewer.init();
+  mode = MODE.DIORAMA;
+  DioramaViewer.focus();
   GeneratedMeshEditor.init();
-  GeneratedMeshEditor.openEditorForGenerator(DeadTreeMaker);
+  // GeneratedMeshEditor.openEditorForGenerator(DeadTreeMaker);
 }
 
 export default {init};

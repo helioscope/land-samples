@@ -3,10 +3,12 @@ import * as THREE from 'three';
 import {ConiferMaker, DeadTreeMaker, TreeStumpMaker} from './treeMaker';
 import {CumulousCloudMaker} from './cloudMaker';
 import { makeGroundPlane } from './groundMaker';
-import {getRandomValue, randomOdds, randomRange, randomRangeFromArray, WeightedOddsPicker} from './util';
+import {getNewRandomSeed, getRandomValue, RADIANS_FOR_90_DEGREES, randomOdds, randomRange, randomRangeFromArray, setRandomSeed, WeightedOddsPicker} from './util';
 import { Vector3 } from 'three';
 import { FlowerBunchMaker, StickMaker, RockMaker, StalkClumpMaker } from './groundStuffMaker';
 
+
+const ENABLE_SHADOWS = false; // experimental -- needs further investigation & comes at performance cost. also seems to have issues with the hard-edged styling, perhaps the material settings?
 
 let light = null;
 let trees = [];
@@ -19,11 +21,34 @@ let treesGroup = null;
 
 let groundSeed = null;
 
-const NUM_TREES = 10; // stress test 70(x70) hits ~30fps with each tree as separate geometry; switching to buffer geometry raises to ~40fps
+const backgroundColor = "#6688FF"; // must be a color string, as we're technically using css here
+const ambientLightColor = 0xFFFFFF;
+const ambientLightIntensity = 0.5;
+const directionalLightColor = 0xFFFFFF;
+const directionalLightIntensity = 0.9;
+const directionaLightTargetX = 0;
+const directionaLightTargetY = 0;
+const directionaLightTargetZ = 4;
+
+const NUM_TREES = 10; // max trees per axis. stress test 70(x70) hits ~30fps with each tree as separate geometry; switching to buffer geometry raises to ~40
+const treeSeparation = 4.5;
 const treeSpawnOddsRange = [0.3, 0.95];
+
+const NUM_CLOUDS = 5; // max clouds per axis
+const cloudSeparation = 14;
 const cloudSpawnOddsRange = [0.3, 1];
-const NUM_CLOUDS = 5;
-const ENABLE_SHADOWS = false;
+const cloudHeightRange = [19.5, 21.5];
+
+const waterHeight = 1.125;
+const waterColor = 0x182090;
+const waterOpacity = 0.8;
+
+const groundWidth = NUM_TREES * treeSeparation;
+const groundLength = NUM_TREES * treeSeparation;
+
+const groundStuffCountRange = [45,350];
+
+const groundRaycasterHeight = 30;
 
 export function initDiorama(scene, renderer) {
   dioramaGroup = new THREE.Group();
@@ -32,16 +57,16 @@ export function initDiorama(scene, renderer) {
   treesGroup = new THREE.Group();
   dioramaGroup.add(treesGroup);
 
-  renderer.domElement.style.backgroundColor = "#6688FF";
+  renderer.domElement.style.backgroundColor = backgroundColor;
 
   prepLighting(renderer);
 }
 
 export function prepLighting(renderer) {
   // scene.add(new THREE.HemisphereLight("#ffffff","#666666"));
-  dioramaGroup.add(new THREE.AmbientLight(0xFFFFFF, 0.5));
+  dioramaGroup.add(new THREE.AmbientLight(ambientLightColor, ambientLightIntensity));
   
-  light = new THREE.DirectionalLight(0xffffff, 0.9);
+  light = new THREE.DirectionalLight(directionalLightColor, directionalLightIntensity);
   
   if (ENABLE_SHADOWS) {
     renderer.shadowMap.enabled = true; // default: false
@@ -54,15 +79,18 @@ export function prepLighting(renderer) {
   }
 
   light.position.y = 20;
-  light.target.position.z = 4;
-  light.target.position.y = 0;
+  light.target.position.set(directionaLightTargetX, directionaLightTargetY, directionaLightTargetZ);
 
   dioramaGroup.add(light);
   dioramaGroup.add(light.target);
 }
 
-export function generateFullDiorama() {
-  createGround();
+export function generateFullDiorama(seed) {
+  if (seed === undefined) {
+    seed = getNewRandomSeed();
+  }
+  setRandomSeed(seed);
+  createGround(seed);
   createWater();
   createTrees();
   createGroundStuff();
@@ -75,6 +103,7 @@ function cleanUpObjects(collection, group) {
   if (collection.length > 0) {
     _.each(collection, (item) => {
       group.remove(item);
+      item.geometry.dispose();
     });
     collection.splice(collection.length);
   }
@@ -97,12 +126,12 @@ function spawnInGrid(collection, group, meshGenerator, gridSize, separationDista
   }
 }
 
-function createGround() {
-  groundSeed = new Date().toString();
+function createGround(seed) {
+  groundSeed = seed;
   if (ground) {
     dioramaGroup.remove(ground);
   }
-  ground = makeGroundPlane(NUM_TREES * 4.5, NUM_TREES * 4.5, groundSeed);
+  ground = makeGroundPlane(groundWidth, groundLength, groundSeed);
   dioramaGroup.add(ground);
   if (ENABLE_SHADOWS) {
     ground.receiveShadow = true;
@@ -113,17 +142,17 @@ function createWater() {
   if (water) {
     dioramaGroup.remove(water);
   }
-  const planeGeometry = new THREE.PlaneGeometry(NUM_TREES * 4.5, NUM_TREES * 4.5);
-  planeGeometry.rotateX(-Math.PI/2);
+  const planeGeometry = new THREE.PlaneGeometry(NUM_TREES * treeSeparation, NUM_TREES * treeSeparation);
+  planeGeometry.rotateX(-RADIANS_FOR_90_DEGREES);
   water = new THREE.Mesh(
     planeGeometry,
     new THREE.MeshLambertMaterial({
-      color: 0x182090,
+      color: waterColor,
       transparent: true,
-      opacity: 0.8
+      opacity: waterOpacity
     })
   );
-  water.position.y = 1;
+  water.position.y = waterHeight;
   dioramaGroup.add(water);
 }
 
@@ -139,13 +168,13 @@ function createTrees() {
   }
   const downVector = new THREE.Vector3(0, -1, 0);
   const raycaster = new THREE.Raycaster( new THREE.Vector3(), downVector, 0.1, 100 );
-  spawnInGrid(trees, treesGroup, randomTreeGenerator, NUM_TREES, 4.5, (tree) => {
+  spawnInGrid(trees, treesGroup, randomTreeGenerator, NUM_TREES, treeSeparation, (tree) => {
     if (randomOdds(removalOdds)) {
       treesGroup.remove(tree);
       return;
     }
     
-    raycaster.set(new Vector3(tree.position.x, 30, tree.position.z), downVector);
+    raycaster.set(new Vector3(tree.position.x, groundRaycasterHeight, tree.position.z), downVector);
     
     let intersections = raycaster.intersectObject(ground);
     let canPlaceHere = true;
@@ -169,8 +198,8 @@ function createTrees() {
 }
 
 function createGroundStuff() {
-  const groundWidth = NUM_TREES * 4.5;
-  const groundLength = NUM_TREES * 4.5;
+  const groundWidth = NUM_TREES * treeSeparation;
+  const groundLength = NUM_TREES * treeSeparation;
   
   const leftBound = groundWidth * -0.5 + 1;
   const rightBound = groundWidth * 0.5 - 1;
@@ -182,7 +211,7 @@ function createGroundStuff() {
   const downVector = new THREE.Vector3(0, -1, 0);
   const raycaster = new THREE.Raycaster( new THREE.Vector3(), downVector, 0.1, 100 );
 
-  const numObjects = randomRange(45,350);
+  const numObjects = randomRangeFromArray(groundStuffCountRange);
 
   const groundSpawnPicker = new WeightedOddsPicker([
     {value : StalkClumpMaker, weight: 50},
@@ -212,7 +241,7 @@ function createGroundStuff() {
   cleanUpObjects(groundStuff, dioramaGroup);
 
   for (let i = 0; i < numObjects; i++) {
-    raycaster.set(new Vector3(randomRangeFromArray(xBounds), 30, randomRangeFromArray(zBounds)), downVector);
+    raycaster.set(new Vector3(randomRangeFromArray(xBounds), groundRaycasterHeight, randomRangeFromArray(zBounds)), downVector);
     
     let intersections = raycaster.intersectObject(ground);
     let pos = new THREE.Vector3();
@@ -242,11 +271,11 @@ function createGroundStuff() {
 
 function createClouds() {
   const removalOdds = 1 - randomRangeFromArray(cloudSpawnOddsRange);
-  spawnInGrid(clouds, dioramaGroup, CumulousCloudMaker.makeRandomMesh.bind(CumulousCloudMaker), NUM_CLOUDS, 14, (cloud) => {
+  spawnInGrid(clouds, dioramaGroup, CumulousCloudMaker.makeRandomMesh.bind(CumulousCloudMaker), NUM_CLOUDS, cloudSeparation, (cloud) => {
     if (randomOdds(removalOdds)) {
       dioramaGroup.remove(cloud);
       return;
     }
-    cloud.position.y = 20;
+    cloud.position.y = randomRangeFromArray(cloudHeightRange);
   });
 }

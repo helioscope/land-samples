@@ -6,7 +6,7 @@ require('./threejs-extras/OrbitControls');
 let orbitControls = null;
 
 import { initDiorama, generateFullDiorama } from './diorama';
-import { RADIANS_FOR_1_DEGREE } from './util';
+import { getNewRandomSeed, RADIANS_FOR_1_DEGREE } from './util';
 
 let rootElem = null;
 let renderer= null;
@@ -14,8 +14,6 @@ let scene = null;
 let camera = null;
 let clock = null;
 let thisIsActive = false;
-
-let dioramaGroup = null;
 
 function init() {
   rootElem = document.getElementById('app-root');
@@ -32,7 +30,7 @@ function init() {
   rootElem.appendChild( renderer.domElement );
   
   initDiorama(scene, renderer);
-  dioramaGroup = generateFullDiorama();
+  generateFullDiorama();
 
   camera.position.z = 20;
   camera.position.y = 12;
@@ -50,7 +48,7 @@ function init() {
   document.addEventListener('keydown', (evt) => {
     if (thisIsActive) {
       if (evt.key == 'r') {
-        dioramaGroup = generateFullDiorama();
+        generateFullDiorama(getNewRandomSeed());
       } else if (evt.key == 'o') {
         orbitControls.reset();
       }

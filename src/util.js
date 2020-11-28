@@ -90,6 +90,9 @@ export function remapValue(value, inMin, inMax, outMin, outMax) {
   const outRange = outMax - outMin
   return outRange * ((value - inMin) / inRange) + outMin;
 }
+export function remapValueFromArrays(value, inArr, outArr) {
+  return remapValue(value, inArr[0], inArr[1], outArr[0], outArr[1]);
+}
 
 export function jitterVertices(geometry, maxDistance){
   // note: maxDistance is per axis, linear distance could be greater
