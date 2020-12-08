@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import * as dat from 'dat.gui';
 
 import {ConiferMaker, DeadTreeMaker, TreeStumpMaker} from './treeMaker';
 import {CumulousCloudMaker} from './cloudMaker';
@@ -6,6 +7,7 @@ import { makeGroundPlane } from './groundMaker';
 import {getNewRandomSeed, getRandomValue, RADIANS_FOR_90_DEGREES, randomOdds, randomRange, randomRangeFromArray, setRandomSeed, WeightedOddsPicker} from './util';
 import { Vector3 } from 'three';
 import { FlowerBunchMaker, StickMaker, RockMaker, StalkClumpMaker } from './groundStuffMaker';
+import { formPlaneBorder } from './generatorUtil';
 
 
 const ENABLE_SHADOWS = false; // experimental -- needs further investigation & comes at performance cost. also seems to have issues with the hard-edged styling, perhaps the material settings?
@@ -40,8 +42,13 @@ const cloudSpawnOddsRange = [0.3, 1];
 const cloudHeightRange = [19.5, 21.5];
 
 const waterHeight = 1.125;
-const waterColor = 0x182090;
-const waterOpacity = 0.8;
+const waterColor = 0x0f2343;//0x182090;
+const waterOpacity = 0.85;//0.8;
+const waterMaterial = new THREE.MeshLambertMaterial({
+  color: waterColor,
+  transparent: true,
+  opacity: waterOpacity
+});
 
 const groundWidth = NUM_TREES * treeSeparation;
 const groundLength = NUM_TREES * treeSeparation;
@@ -60,6 +67,18 @@ export function initDiorama(scene, renderer) {
   renderer.domElement.style.backgroundColor = backgroundColor;
 
   prepLighting(renderer);
+
+  let testColor = {
+    color: waterColor
+  };
+
+  let gui = new dat.GUI();
+  gui.addColor(testColor, 'color').onChange(()=>{
+    waterMaterial.color = new THREE.Color(testColor.color);
+  });
+  gui.add(waterMaterial, 'opacity',0,1);
+
+  // console.log(waterMaterial);
 }
 
 export function prepLighting(renderer) {
@@ -142,15 +161,14 @@ function createWater() {
   if (water) {
     dioramaGroup.remove(water);
   }
-  const planeGeometry = new THREE.PlaneGeometry(NUM_TREES * treeSeparation, NUM_TREES * treeSeparation);
+  const waterWidth = groundWidth - 0.2;
+  const waterLength = groundLength - 0.2;
+  const planeGeometry = new THREE.PlaneGeometry( waterWidth * 3, waterLength * 3, 3, 3);
+  formPlaneBorder(planeGeometry, 4, 4, -6);
   planeGeometry.rotateX(-RADIANS_FOR_90_DEGREES);
   water = new THREE.Mesh(
     planeGeometry,
-    new THREE.MeshLambertMaterial({
-      color: waterColor,
-      transparent: true,
-      opacity: waterOpacity
-    })
+    waterMaterial
   );
   water.position.y = waterHeight;
   dioramaGroup.add(water);
@@ -198,9 +216,6 @@ function createTrees() {
 }
 
 function createGroundStuff() {
-  const groundWidth = NUM_TREES * treeSeparation;
-  const groundLength = NUM_TREES * treeSeparation;
-  
   const leftBound = groundWidth * -0.5 + 1;
   const rightBound = groundWidth * 0.5 - 1;
   const nearBound = groundLength * -0.5 + 1;

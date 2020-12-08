@@ -19,7 +19,7 @@ function init() {
   rootElem = document.getElementById('app-root');
 
   const aspectRatio = rootElem.clientWidth / rootElem.clientHeight;
-  const initialFOV = 75;
+  const initialFOV = 55;
   
   renderer = new THREE.WebGLRenderer({alpha:true});
   camera = new THREE.PerspectiveCamera(initialFOV, aspectRatio, 0.1, 1000);

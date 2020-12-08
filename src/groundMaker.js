@@ -5,7 +5,7 @@ import * as THREE from 'three';
 import SimplexNoise from 'simplex-noise';
 
 import {RADIANS_FOR_180_DEGREES, RADIANS_FOR_1_DEGREE, RADIANS_FOR_360_DEGREES, RADIANS_FOR_90_DEGREES, randomRange, randomRangeFromArray, randomRangeIntFromArray, remapValue, remapValueFromArrays} from './util';
-import {finalizeMesh, USE_HARD_EDGE_LOWPOLY_STYLE} from './generatorUtil';
+import {finalizeMesh, formPlaneBorder, USE_HARD_EDGE_LOWPOLY_STYLE} from './generatorUtil';
 
 
 let noiseSeed = new Date().toString();
@@ -15,18 +15,17 @@ const heightmapContext = heightmapCanvas.getContext('2d');
 
 const NOISE_OCTAVES = 16;
 
-const heightColors = [
-  0x463914,
-  0x003911,
-  0x004511,
-  0x004911,
-  0x005212,
-  0x006014,
-  0x007020,
-]; // each entry's index is its y-position
+// const heightColors = [// more toy-like
+//   0x463914,
+//   0x003911,
+//   0x004511,
+//   0x004911,
+//   0x005212,
+//   0x006014,
+//   0x007020,
+// ]; // each entry's index is its y-position
 
-/*
-  more realistic alternatives:
+const heightColors = [ // more realistic
   0x463914,
   0x323c1b,
   0x323c1b,
@@ -34,16 +33,20 @@ const heightColors = [
   0x224911,
   0x206014,
   0x485F3F,
-*/
+]; // each entry's index is its y-position
 
 const noiseHeightRange = [-0.5, 6.5];
+
+const jitterXRange = [-0.15, 0.15];
+const jitterZRange = [-0.15, 0.15];
+const jitterYRange = [-0.2, 0.2];
 
 const bigLakeCountRange = [0, 1];
 const bigLakeWidthRange = [5, 20];
 const bigLakeIntensity = 0.8;
 const bigLakeRimIntensity = 0.125;
 const bigLakeRimThickness = 3;
-const maxLakeAspectRatio = 2.5; // note: aspect ratio enforcement won't drop below width range min (or rise above max)
+const maxLakeAspectRatio = 2.5; // note: aspect ratio enforcement will *not* go beyond the width-range (below min or above max)
 
 const islandCountRange = [0, 3];
 const islandRimThicknessRange = [0,4];
@@ -192,7 +195,17 @@ function getColorForHeight(height) {
 }
 
 export function makeGroundPlane(width, height, seed=undefined) {
-  const geometry = new THREE.PlaneGeometry(width, height, width, height);
+  const borderSize = 1; // note: changing this might break things
+  const sliceDepth = -5;
+  const vertCountX = width + (borderSize * 2);
+  const vertCountY = height + (borderSize * 2);
+  const geometry = new THREE.PlaneGeometry(width + (borderSize * 2), height + (borderSize * 2), vertCountX - 1, vertCountY - 1);
+
+  // note: the vertex count is larger than the face count by 1 (hence the subtraction above -- we want 1 texture sample per 1 vertex)
+  // e.g. 2x2 faces means 3x3 vertices
+
+  // also note: the plane geometry is generated on the x/y plane,
+  // so using it as a ground plane (where y is the axis of gravity) requires rotating first (which we're currently doing at the end)
 
   if (seed !== undefined) {
     noiseSeed = seed;
@@ -200,22 +213,29 @@ export function makeGroundPlane(width, height, seed=undefined) {
   }
 
   const texture = generateTexture(width, height);
-  for(let ty = 0; ty < texture.height; ty++) {
-    for (let tx = 0; tx < texture.width; tx++) {
-        const vertIndex = (ty * (texture.height) + tx);
-        const nextVertIndex = (ty * (texture.height+1) + tx);
-        const value = texture.data[vertIndex*4]; // (sampling the red channel)
-        const vert = geometry.vertices[nextVertIndex];
+  for (let ty = 0; ty < height; ty++) {
+    let inYInterior = ty > 0 && ty < height - 1;
+    for (let tx = 0; tx < width; tx++) {
+        const vertIndex = ((ty + borderSize) * (vertCountX) + (tx + borderSize));
+        const textureIndex = (ty * width + tx);
+        const value = texture.data[textureIndex*4]; // (sampling the red channel)
+        const vert = geometry.vertices[vertIndex];
         
         vert.z = remapValueFromArrays(value, [0,255], noiseHeightRange);
 
         // some ideas from the tutorial:
         // if(vert.z > 2.5) vert.z *= 1.3; //exaggerate the peaks
         
-        // vert.x += randomRange(-0.1, 0.1); //jitter x
-        // vert.y += randomRange(-0.25, 0.25); //jitter y
+        // a bit of extra mesh noise
+        if (inYInterior && tx > 0 && tx < width - 1) { // this ground-axis displacement makes the outer edges rough -- easier to skip the outer edges
+          vert.x += randomRangeFromArray(jitterXRange);
+          vert.y += randomRangeFromArray(jitterZRange); // using Z for Y here is weird, and related to the rotation of the plane
+        }
+        vert.z += randomRangeFromArray(jitterYRange); // using Y for Z here is weird, and related to the rotation of the plane
     }
   }
+
+  formPlaneBorder(geometry, vertCountX, vertCountY, sliceDepth);
 
   if (USE_HARD_EDGE_LOWPOLY_STYLE) {
     // coloring by face has a fun lo-fi retro-blend look
@@ -224,9 +244,13 @@ export function makeGroundPlane(width, height, seed=undefined) {
       const vertB = geometry.vertices[face.b];
       const vertC = geometry.vertices[face.c];
 
-      const maxHeight = Math.max(vertA.z ,Math.max(vertB.z, vertC.z));
+      if (vertA.z == sliceDepth || vertB.z == sliceDepth || vertC.z == sliceDepth) {
+        face.color.set(getColorForHeight(sliceDepth));
+      } else {
+        const maxHeight = Math.max(vertA.z ,Math.max(vertB.z, vertC.z));
 
-      face.color.set(getColorForHeight(maxHeight));
+        face.color.set(getColorForHeight(maxHeight));
+      }
     });
   } else {
     // coloring per vertex is much smoother (and potentially more "blurry"-looking)

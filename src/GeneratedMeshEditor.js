@@ -48,17 +48,17 @@ function init() {
   scene.add(groundPlane);
 
   let zAxis = new THREE.Line (
-    new THREE.BufferGeometry().setFromPoints([ new Vector3(0, 0, axisReferenceLength * -0.1), new Vector3(0, 0, axisReferenceLength) ]),
+    new THREE.BufferGeometry().setFromPoints([ new THREE.Vector3(0, 0, axisReferenceLength * -0.1), new THREE.Vector3(0, 0, axisReferenceLength) ]),
     new THREE.LineBasicMaterial( { color: zAxisColor } ),
   );
   scene.add(zAxis);
   let yAxis = new THREE.Line (
-    new THREE.BufferGeometry().setFromPoints([ new Vector3(0, axisReferenceLength  * -0.1, 0), new Vector3(0, axisReferenceLength, 0) ]),
+    new THREE.BufferGeometry().setFromPoints([ new THREE.Vector3(0, axisReferenceLength  * -0.1, 0), new THREE.Vector3(0, axisReferenceLength, 0) ]),
     new THREE.LineBasicMaterial( { color: yAxisColor } ),
   );
   scene.add(yAxis);
   let xAxis = new THREE.Line (
-    new THREE.BufferGeometry().setFromPoints([ new Vector3(axisReferenceLength * -0.1, 0, 0), new Vector3(axisReferenceLength, 0, 0) ]),
+    new THREE.BufferGeometry().setFromPoints([ new THREE.Vector3(axisReferenceLength * -0.1, 0, 0), new THREE.Vector3(axisReferenceLength, 0, 0) ]),
     new THREE.LineBasicMaterial( { color: xAxisColor } ),
   );
   scene.add(xAxis);
