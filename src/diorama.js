@@ -7,7 +7,7 @@ import { makeGroundPlane } from './groundMaker';
 import {getNewRandomSeed, getRandomValue, RADIANS_FOR_90_DEGREES, randomOdds, randomRange, randomRangeFromArray, setRandomSeed, WeightedOddsPicker} from './util';
 import { Vector3 } from 'three';
 import { FlowerBunchMaker, StickMaker, RockMaker, StalkClumpMaker } from './groundStuffMaker';
-import { formPlaneBorder } from './generatorUtil';
+import { formPlaneBorder, USE_HARD_EDGE_LOWPOLY_STYLE } from './generatorUtil';
 
 
 const ENABLE_SHADOWS = false; // experimental -- needs further investigation & comes at performance cost. also seems to have issues with the hard-edged styling, perhaps the material settings?
@@ -23,12 +23,12 @@ let treesGroup = null;
 
 let groundSeed = null;
 
-const backgroundColor = "#6688FF"; // must be a color string, as we're technically using css here
+const backgroundColor = "rgb(72, 151, 221)";//"#6688FF"; // must be a color string, as we're technically using css here
 const ambientLightColor = 0xFFFFFF;
 const ambientLightIntensity = 0.5;
 const directionalLightColor = 0xFFFFFF;
 const directionalLightIntensity = 0.9;
-const directionaLightTargetX = 0;
+const directionaLightTargetX = 2.75;
 const directionaLightTargetY = 0;
 const directionaLightTargetZ = 4;
 
@@ -43,11 +43,14 @@ const cloudHeightRange = [19.5, 21.5];
 
 const waterHeight = 1.125;
 const waterColor = 0x0f2343;//0x182090;
-const waterOpacity = 0.85;//0.8;
-const waterMaterial = new THREE.MeshLambertMaterial({
+const waterOpacity = 0.84;//0.8;
+const waterShininess = 10;//15
+const waterMaterial = new THREE.MeshPhongMaterial({
   color: waterColor,
   transparent: true,
-  opacity: waterOpacity
+  opacity: waterOpacity,
+  flatShading: USE_HARD_EDGE_LOWPOLY_STYLE,
+  shininess: waterShininess
 });
 
 const groundWidth = NUM_TREES * treeSeparation;
@@ -77,6 +80,7 @@ export function initDiorama(scene, renderer) {
     waterMaterial.color = new THREE.Color(testColor.color);
   });
   gui.add(waterMaterial, 'opacity',0,1);
+  gui.add(waterMaterial, 'shininess',0,255);
 
   // console.log(waterMaterial);
 }
@@ -166,6 +170,8 @@ function createWater() {
   const planeGeometry = new THREE.PlaneGeometry( waterWidth * 3, waterLength * 3, 3, 3);
   formPlaneBorder(planeGeometry, 4, 4, -6);
   planeGeometry.rotateX(-RADIANS_FOR_90_DEGREES);
+  planeGeometry.verticesNeedUpdate = true;
+  planeGeometry.computeFlatVertexNormals();
   water = new THREE.Mesh(
     planeGeometry,
     waterMaterial

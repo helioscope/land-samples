@@ -190,6 +190,7 @@ export const RockMaker = new MeshGenerator({
     heightScale : { range : [0.3, 1.1] },
     widthScale : { range : [0.45, 1] },
     tilt : { range : [-10, 10] },
+    sink : {range : [-0.1, 0.6]}, // sink rock into ground (0 - 1) or lift rock out of ground (-1 - 0) (note: this is multiplied by size, jitter may change)
     seed: { type : 'seed' },
   },
   generatorFunction : (params) => {
@@ -203,6 +204,7 @@ export const RockMaker = new MeshGenerator({
     rock.scale(params.widthScale, params.heightScale, 1);
     rock.rotateZ(params.tilt * RADIANS_FOR_1_DEGREE);
     rock.rotateY(facingAngle);
+    rock.translate(0, -params.sink * params.size * params.heightScale, 0);
     rock.faces.forEach(f => f.color.set(color));
 
     // optionally add other bumps?

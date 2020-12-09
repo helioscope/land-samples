@@ -9,7 +9,7 @@ import { MeshGenerator } from './MeshGenerator';
 
 const cloudMaterial = new THREE.MeshLambertMaterial({
   color: 0xFFFFFF,
-  emissive: 0x333333,
+  emissive: 0x303030,
   flatShading: USE_HARD_EDGE_LOWPOLY_STYLE,
 });
 

@@ -32,28 +32,32 @@ function init() {
   initDiorama(scene, renderer);
   generateFullDiorama();
 
-  camera.position.z = 20;
-  camera.position.y = 12;
+  camera.position.z = 23.5;
+  camera.position.y = 9.5;
+  camera.position.x = 22.9;
 
   orbitControls = new THREE.OrbitControls( camera, renderer.domElement );
   orbitControls.enableDamping = true;
-  orbitControls.maxDistance = 50;
-  orbitControls.minDistance = 3;
-  orbitControls.maxPolarAngle = RADIANS_FOR_1_DEGREE * 85;
+  orbitControls.maxDistance = 58;
+  orbitControls.minDistance = 2;
+  orbitControls.maxPolarAngle = RADIANS_FOR_1_DEGREE * 90;
   orbitControls.zoomSpeed = 0.6;
-  orbitControls.target.y = 2.5;
+  orbitControls.target.y = 3;
 
   animate();
 
   document.addEventListener('keydown', (evt) => {
+    const keyString = evt.key.toLowerCase();
     if (thisIsActive) {
-      if (evt.key == 'r') {
+      if (keyString == 'r') {
         generateFullDiorama(getNewRandomSeed());
-      } else if (evt.key == 'o') {
+      } else if (keyString == 'o') {
         orbitControls.reset();
       }
     }
   });
+
+  window.camera = camera;
 }
 
 function animate() {
