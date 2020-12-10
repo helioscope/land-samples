@@ -6,6 +6,7 @@ import SimplexNoise from 'simplex-noise';
 
 import {RADIANS_FOR_180_DEGREES, RADIANS_FOR_1_DEGREE, RADIANS_FOR_360_DEGREES, RADIANS_FOR_90_DEGREES, randomRange, randomRangeFromArray, randomRangeIntFromArray, remapValue, remapValueFromArrays} from './util';
 import {finalizeMesh, formPlaneBorder, USE_HARD_EDGE_LOWPOLY_STYLE} from './generatorUtil';
+import { generateCanvasEllipseShape } from './CanvasBezierShape';
 
 
 let noiseSeed = new Date().toString();
@@ -42,15 +43,15 @@ const jitterZRange = [-0.15, 0.15];
 const jitterYRange = [-0.2, 0.2];
 
 const bigLakeCountRange = [0, 1];
-const bigLakeWidthRange = [5, 20];
+const bigLakeWidthRange = [6, 18];
 const bigLakeIntensity = 0.8;
 const bigLakeRimIntensity = 0.125;
 const bigLakeRimThickness = 3;
-const maxLakeAspectRatio = 2.5; // note: aspect ratio enforcement will *not* go beyond the width-range (below min or above max)
+const maxLakeAspectRatio = 2.25; // note: aspect ratio enforcement will *not* go beyond the width-range (below min or above max)
 
 const islandCountRange = [0, 3];
-const islandRimThicknessRange = [0,4];
-const islandHeightRange = [30, 150]; // note: corresponds to color-channel value (0-255) and should be an integer
+const islandRimThicknessRange = [0,5];
+const islandHeightRange = [28, 135]; // note: corresponds to color-channel value (0-255) and should be an integer
 const islandIntensity = 0.85; // corresponds to opacity of height coloring
 const islandRimIntensity = 0.3; // ditto
 const islandMaxRelativeAngle = 20; // max rotation (either way) away from the lake's angle
@@ -61,6 +62,11 @@ const smallLakeLengthRange = [1,5];
 const smallLakeIntensity = 0.85;
 const smallLakeRimIntensity = 0.275;
 const smallLakeRimThickness = 2.5;
+
+// for lakes & islands -- all ranges are factors
+const pathCPScaleRange = [0.8, 1.5]; // amount to scale bezier path control points (i.e. stretch away from / towards the path point they're attached to), multiplied by existing offset
+const pathCPOffsetRange = [-0.25, 0.25]; // amount to nudge bezier path control points (effectively tilting them along path point they're attached to), multiplied by axis size
+const pathEPJitterRange = [-0.3, 0.3]; // amount to nudge bezier path points (moving control points in unison), multiplied by axis size
 
 
 function sampleNoise(x, y) {
@@ -109,6 +115,61 @@ function generateNoiseTexture(width, height) {
   }0
 }
 
+function makeWobblyEllipse(params) {
+  let width = params.width;
+  let height = params.height;
+  let cpOffsetRangeX = [width * params.cpOffsetRange[0], width * params.cpOffsetRange[1]];
+  let cpOffsetRangeY = [height * params.cpOffsetRange[0], height * params.cpOffsetRange[1]];
+  let cpScaleRange = params.cpScaleRange;
+  let epOffsetRangeX = [width * params.epOffsetRange[0], width * params.epOffsetRange[1]];
+  let epOffsetRangeY = [height * params.epOffsetRange[0], height * params.epOffsetRange[1]];
+
+  let shape = generateCanvasEllipseShape(params.centerX, params.centerY, width, height);
+  let segs = shape.segments;
+
+  let lastSeg = segs[segs.length-1];
+  for (let i = 0; i < segs.length; i++) {
+    let seg = segs[i];
+    
+    // rotate control points in unison per endpoint
+    let cpOffsetX = randomRangeFromArray(cpOffsetRangeX);
+    let cpOffsetY = randomRangeFromArray(cpOffsetRangeY);
+    seg.control1.x += cpOffsetX;
+    seg.control1.y += cpOffsetY;
+    lastSeg.control2.x -= cpOffsetX; // move this control point the opposite
+    lastSeg.control2.y -= cpOffsetY;
+    
+    // scale control points in unison per endpoint
+    let cpScale = randomRangeFromArray(cpScaleRange);
+    let xDist = seg.control1.x - lastSeg.endPoint.x;
+    let yDist = seg.control1.y - lastSeg.endPoint.y;
+    seg.control1.x = lastSeg.endPoint.x + (xDist * cpScale);
+    seg.control1.y = lastSeg.endPoint.y + (yDist * cpScale);
+    xDist = lastSeg.control2.x - lastSeg.endPoint.x;
+    yDist = lastSeg.control2.y - lastSeg.endPoint.y;
+    lastSeg.control2.x = lastSeg.endPoint.x + (xDist * cpScale);
+    lastSeg.control2.y = lastSeg.endPoint.y + (yDist * cpScale);
+    
+    // move endpoints + attached control points together
+    let epOffsetX = randomRangeFromArray(epOffsetRangeX);
+    let epOffsetY = randomRangeFromArray(epOffsetRangeY);
+    let nextIndex = i+1;
+    if (nextIndex >= segs.length) {
+      nextIndex = 0;
+    }
+    let nextSeg = segs[nextIndex];
+    seg.endPoint.x += epOffsetX;
+    seg.endPoint.y += epOffsetY;
+    seg.control2.x += epOffsetX;
+    seg.control2.y += epOffsetY;
+    nextSeg.control1.x += epOffsetX;
+    nextSeg.control1.y += epOffsetY;
+    
+    lastSeg = seg;
+  }
+  return shape;
+}
+
 function generateLakes(width, height) {
   const c = heightmapContext;
   const numBigLakes = randomRangeIntFromArray(bigLakeCountRange);
@@ -121,8 +182,19 @@ function generateLakes(width, height) {
     const lakeCenterX = randomRange(0, width);
     const lakeCenterY = randomRange(0, height);
 
-    c.beginPath();
-    c.ellipse(lakeCenterX, lakeCenterY, lakeRadiusX, lakeRadiusY, lakeAngle, 0, RADIANS_FOR_360_DEGREES, false);
+    // c.beginPath();
+    // c.ellipse(lakeCenterX, lakeCenterY, lakeRadiusX, lakeRadiusY, lakeAngle, 0, RADIANS_FOR_360_DEGREES, false);
+    let shape = makeWobblyEllipse({
+      centerX : lakeCenterX,
+      centerY : lakeCenterY,
+      width : lakeRadiusX,
+      height : lakeRadiusY,
+      cpOffsetRange : pathCPOffsetRange,
+      epOffsetRange : pathEPJitterRange,
+      cpScaleRange : pathCPScaleRange
+    });
+    shape.rotateAround(new THREE.Vector2(lakeCenterX, lakeCenterY), lakeAngle);
+    shape.addPathToCanvas(c);
     c.fillStyle = `rgba(0,0,0,${smallLakeIntensity})`;
     c.fill();
     c.lineWidth = smallLakeRimThickness;
@@ -143,8 +215,19 @@ function generateLakes(width, height) {
     // const numExtraEllipses = randomRangeInt(0,2); // later
     const numIslands = randomRangeIntFromArray(islandCountRange);
 
-    c.beginPath();
-    c.ellipse(lakeCenterX, lakeCenterY, lakeRadiusX, lakeRadiusY, lakeAngle, 0, RADIANS_FOR_360_DEGREES, false);
+    // c.beginPath();
+    // c.ellipse(lakeCenterX, lakeCenterY, lakeRadiusX, lakeRadiusY, lakeAngle, 0, RADIANS_FOR_360_DEGREES, false);
+    let lakeShape = makeWobblyEllipse({
+      centerX : lakeCenterX,
+      centerY : lakeCenterY,
+      width : lakeRadiusX,
+      height : lakeRadiusY,
+      cpOffsetRange : pathCPOffsetRange,
+      epOffsetRange : pathEPJitterRange,
+      cpScaleRange : pathCPScaleRange
+    });
+    lakeShape.rotateAround(new THREE.Vector2(lakeCenterX, lakeCenterY), lakeAngle);
+    lakeShape.addPathToCanvas(c);
     c.fillStyle = `rgba(0,0,0,${bigLakeIntensity})`;
     c.fill();
     c.lineWidth = bigLakeRimThickness;
@@ -163,8 +246,19 @@ function generateLakes(width, height) {
       let islandCenterY = randomRange(lakeCenterY - minLakeAxis + 1, lakeCenterY + minLakeAxis - 1); // EXTRACT 1?
       let islandAngle = randomRange(lakeAngle - (RADIANS_FOR_1_DEGREE * islandMaxRelativeAngle), lakeAngle + (RADIANS_FOR_1_DEGREE * islandMaxRelativeAngle));
       let islandHeightValue = randomRangeIntFromArray(islandHeightRange);
-      c.beginPath();
-      c.ellipse(islandCenterX, islandCenterY, islandRadiusX, islandRadiusY, islandAngle, 0, RADIANS_FOR_360_DEGREES, false);
+      // c.beginPath();
+      // c.ellipse(islandCenterX, islandCenterY, islandRadiusX, islandRadiusY, islandAngle, 0, RADIANS_FOR_360_DEGREES, false);
+      let islandShape = makeWobblyEllipse({
+        centerX : islandCenterX,
+        centerY : islandCenterY,
+        width : islandRadiusX,
+        height : islandRadiusY,
+        cpOffsetRange : pathCPOffsetRange,
+        epOffsetRange : pathEPJitterRange,
+        cpScaleRange : pathCPScaleRange
+      });
+      islandShape.rotateAround(new THREE.Vector2(islandCenterX, islandCenterY), islandAngle);
+      islandShape.addPathToCanvas(c);
       c.lineWidth = randomRangeFromArray(islandRimThicknessRange);
       c.strokeStyle = `rgba(${islandHeightValue}, ${islandHeightValue}, ${islandHeightValue}, ${islandRimIntensity})`;
       c.stroke();
