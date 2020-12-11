@@ -1,29 +1,26 @@
 ## Goals: ##
 
+blur shapes (e.g. for lakes) before adding them? use a separate canvas for the shapes, then (e.g.) `canvas.style.filter = "blur(3px)"` to enable the filter?
+
+cluster-spawn of flower, grass, or rock fields in diorama (use bitmap as stamp/mask, rather than just using the grid-spawn?) (bundle geometry into a single mesh?)
+
+rivers in ground-generator
+
 convert to parametric (& deterministic) generators (+ use MeshGenerator)
 - groundmaker
 -- pass options dict to finalizeMesh to skip the verticesNeedUpdate & generate normals bits, also to indicate other material? incorporate this into the MeshGenerator?
 
 define editor as its own separate thing, whose activation pauses the diorama scene (updates and rendering)?
-- separate out the editor into its own file DONE
-- add wireframe base plane DONE
-- add x y and z lines through origin DONE
 - add human figure stand-in (maybe just a cone + ball, about 2m tall)? PASS for now
-- editor has own scene, camera, controls, canvas DONE
-- editor can be opened for a generator KINDA DONE or for a given mesh (code-wise -- the in-diorama raycasting is still to be tested)
+- editor can be opened for a generator or for a given mesh KINDA DONE (code-wise -- the in-diorama raycasting is still to be tested)
 - editor can be overlayed in corner?
 
 make 'seed' parameter added by default -- no need to define it every time?
 revise all angle parameters to use degrees (and just multiply to get radians)
 
-clone params when assigning them to the mesh's userdata DONE
-
-start hooking up dat.gui to be able to tweak settings live - DONE for meshes (just use MeshGenerator)
 setup groundmaker for dat.gui handling
 
-fix diorama etc to use the new generators DONE
-
-in-diorama raycasting is still to be tested
+in-diorama raycasting for selecting meshes (to open the editor) is still to be tested
 
 pick between dat.gui, tweakpane, other alternatives CURRENTLY LEANING TOWARDS DAT.GUI FOR NOW
 - dat.gui's docs are down & it hasn't seen much dev attention, but it works well, has been around for years, and has a nice drag up/down feature for dialing in numbers without resorting to ranges (which kinda restrict you to stay within said ranges). I think I'll run with this for now, but consider switching later
@@ -31,16 +28,25 @@ pick between dat.gui, tweakpane, other alternatives CURRENTLY LEANING TOWARDS DA
 - quicksettings seems pretty solid, but is not under active development and the design is a bit utilitarian
 - guify i didn't really get around to investigating very far, but it apparently offers an "interval" input (i.e. set min & max on one input) and logarithmic slider which might be useful.
 - https://gist.github.com/SMUsamaShah/71d5ac6849cdc0bffff4c19329e9d0bb might have other options worth examining
+- also, of course, i could roll my own
 
-click on mesh to open editor & tweak its params?
 
+stick param for extrusion & cross-section subdivisions (larger sticks will look less like planks)
+stick param for adding one or two branch offshoot stubs, like dead trees have
+rock param for embedding into the ground (y-offset range)
+rock param for mossiness range & color? (just interpolate between base color + moss color)
+
+tiny lump generator
+mushroom generator
+bush generator? (will these just end up looking like the rocks but green?)
+fallen tree generator (takes base point & tip point, so tilt can (more or less) match the ground)
+lillypad generator
 house generator?
 
-try to build out original game idea for github game off?
-
 known issues:
-- the current use of dat.gui to edit arrays (including ranges) ends up editing all usage of those arrays, since those are passed as references
+- the current use of dat.gui to edit arrays (including ranges) ends up editing all usage of those arrays, since those are passed as references FIXED
   - this probably only affects spawning new meshes from that generator
+  - NOTE: THE FIX IS BADLY OPTIMIZED. Definitely cloning more than necessary. It might be better to just deep-clone when copying params to the editor.
 - finalizeMesh has some redundant code now, and seems to have conceptual overlap with MeshGenerator's makeMesh method (while still having its own rigid assumptions)
 
 
@@ -48,13 +54,13 @@ denser groundcover
 add water spawns (long stalks, large fallen branch, rocks)
 camera controls improvements:
 - auto-rotate until camera control is used, then wait N seconds of no control before moving again, slowly building speed
-- better initial camera position
 increase contrast between stem & grass colors & ground color
 presets for different kinds of dioramas (trees: natural, all dead, heavily deforested, slightly used, everything)
-fix terrain edges (off by one v heightmap texture?)
-extend terrain below (to make a dirt-cube of sorts)
-extend water below (to make a water-cube of sorts)
-slightly more complex lake shapes (may add multiple shapes within one tight region)
+fix terrain edges (off by one v heightmap texture?) DONE
+extend terrain below (to make a dirt-cube of sorts) DONE
+extend water below (to make a water-cube of sorts) DONE
+slightly more complex lake shapes DONE (bezier-curve-based ellipsoids are jostled) 
+lakes from multiple shapes within one tight region?
 prevent spawn overlap (e.g. for ground-cover + trees) (save vector2 + radius for each object, separated into layers?)
 basic fallen-tree generator (note: may need special placement rules to orient to the terrain)?
 butterfly generator
