@@ -18,7 +18,7 @@
       #app-root {
         width: 480px;
         height: 360px;
-        border: solid black;
+        border: solid rgb(20, 20, 20);
         position: relative;
       }
       #mesh-editor {
@@ -28,12 +28,31 @@
         left: 0;
         top: 0;
       }
+      button {
+        background-color: rgb(38, 52, 64);
+        color: white;
+        border: none;
+        border-radius: 4px;
+        padding: 10px 18px;
+        font-size: 12px;
+      }
+      button:hover {
+        background-color: rgb(50, 75, 97);
+      }
+      button:active {
+        background-color: rgb(169, 203, 231);
+        color: white;
+      }
+      .button-container {
+        text-align: center;
+      }
     </style>
   </head>
   <body>
     <script src="main.js"></script>
     <div id="outer-container">
       <div id="app-root">
+        <canvas id="main-canvas"></canvas>
         <div id="mesh-editor"></div>
       </div>
     </div>

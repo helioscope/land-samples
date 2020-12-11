@@ -9,11 +9,13 @@ import { initDiorama, generateFullDiorama } from './diorama';
 import { getNewRandomSeed, RADIANS_FOR_1_DEGREE } from './util';
 
 let rootElem = null;
-let renderer= null;
+let renderer = null;
 let scene = null;
 let camera = null;
 let clock = null;
 let thisIsActive = false;
+let canvas = null;
+let buttonContainer = null;
 
 function init() {
   rootElem = document.getElementById('app-root');
@@ -21,13 +23,26 @@ function init() {
   const aspectRatio = rootElem.clientWidth / rootElem.clientHeight;
   const initialFOV = 55;
   
-  renderer = new THREE.WebGLRenderer({alpha:true});
+  canvas = document.getElementById('main-canvas');
+  renderer = new THREE.WebGLRenderer({alpha:false, canvas: canvas, preserveDrawingBuffer: true});
   camera = new THREE.PerspectiveCamera(initialFOV, aspectRatio, 0.1, 1000);
   scene = new THREE.Scene();
   clock = new THREE.Clock();
   
   renderer.setSize( rootElem.clientWidth, rootElem.clientHeight );
   rootElem.appendChild( renderer.domElement );
+  canvas = renderer.domElement;
+
+  buttonContainer = document.createElement('div');
+  buttonContainer.id = "diorama-viewer-buttons";
+  buttonContainer.className = "button-container";
+  rootElem.appendChild(buttonContainer);
+
+  const downloadButton = document.createElement('button');
+  downloadButton.textContent = "save image";
+  downloadButton.onclick = onClickSaveImage;
+  downloadButton.className = "download-button";
+  buttonContainer.appendChild(downloadButton);
   
   initDiorama(scene, renderer);
   generateFullDiorama();
@@ -38,7 +53,7 @@ function init() {
 
   orbitControls = new THREE.OrbitControls( camera, renderer.domElement );
   orbitControls.enableDamping = true;
-  orbitControls.maxDistance = 58;
+  orbitControls.maxDistance = 60;
   orbitControls.minDistance = 2;
   orbitControls.maxPolarAngle = RADIANS_FOR_1_DEGREE * 90;
   orbitControls.zoomSpeed = 0.6;
@@ -76,6 +91,17 @@ function focus() {
 
 function blur() {
   thisIsActive = false;
+}
+
+function onClickSaveImage() {
+  var link = document.createElement('a');
+  link.download = 'diorama-snapshot.png';
+  link.href = renderer.domElement.toDataURL('image/png');
+  link.click();
+
+  // var img = document.createElement('img');
+  // img.src = canvas.toDataURL();
+  // rootElem.appendChild(img);
 }
 
 export default {

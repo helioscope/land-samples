@@ -17,13 +17,15 @@ let trees = [];
 let clouds = [];
 let ground = null;
 let water = null;
+let sky = null;
 let groundStuff = [];
 let dioramaGroup = null;
 let treesGroup = null;
 
 let groundSeed = null;
 
-const backgroundColor = "rgb(72, 151, 221)";//"#6688FF"; // must be a color string, as we're technically using css here
+const skyColor = "rgb(72, 151, 221)";//"#6688FF"; // must be a color string, as we're also using css here
+const skySphereRadius = 500;
 const ambientLightColor = 0xFFFFFF;
 const ambientLightIntensity = 0.5;
 const directionalLightColor = 0xFFFFFF;
@@ -40,6 +42,8 @@ const NUM_CLOUDS = 5; // max clouds per axis
 const cloudSeparation = 14;
 const cloudSpawnOddsRange = [0.3, 1];
 const cloudHeightRange = [19.5, 21.5];
+
+const skyMaterial = new THREE.MeshBasicMaterial({color: skyColor, side: THREE.BackSide});
 
 const waterHeight = 1.125;
 const waterColor = 0x0f2343;//0x182090;
@@ -67,9 +71,15 @@ export function initDiorama(scene, renderer) {
   treesGroup = new THREE.Group();
   dioramaGroup.add(treesGroup);
 
-  renderer.domElement.style.backgroundColor = backgroundColor;
+  renderer.domElement.style.backgroundColor = skyColor;
 
   prepLighting(renderer);
+
+  sky = new THREE.Mesh(
+    new THREE.SphereBufferGeometry(skySphereRadius, 32, 15),
+    skyMaterial
+  );
+  dioramaGroup.add(sky);
 
   let testColor = {
     color: waterColor
@@ -81,8 +91,6 @@ export function initDiorama(scene, renderer) {
   });
   gui.add(waterMaterial, 'opacity',0,1);
   gui.add(waterMaterial, 'shininess',0,255);
-
-  // console.log(waterMaterial);
 }
 
 export function prepLighting(renderer) {
