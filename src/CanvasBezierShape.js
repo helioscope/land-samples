@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import {randomRangeFromArray} from './util';
 
 function generateEllipseSegments(centerX, centerY, radiusX, radiusY) {
   // based on https://stackoverflow.com/a/2173084
@@ -34,9 +35,71 @@ function generateEllipseSegments(centerX, centerY, radiusX, radiusY) {
   ];
 }
 
+export function jostleBezierPath(shape, params) { // maybe move this into a 2d util
+  let cpOffsetRangeX = params.cpOffsetRangeX;
+  let cpOffsetRangeY = params.cpOffsetRangeY;
+  let epOffsetRangeX = params.epOffsetRangeX;
+  let epOffsetRangeY = params.epOffsetRangeY;
+  let cpScaleRange = params.cpScaleRange;
+  
+  let segs = shape.segments;
+  let lastSeg = segs[segs.length-1]; // assumes a closed path
+  if (shape.isClosed) {
+    lastSeg = null;
+  }
+  for (let i = 0; i < segs.length; i++) {
+    let seg = segs[i];
+    
+    if (lastSeg) {
+      // rotate control points in unison per endpoint -- this should probably be moved into a shape method
+      let cpOffsetX = randomRangeFromArray(cpOffsetRangeX);
+      let cpOffsetY = randomRangeFromArray(cpOffsetRangeY);
+      seg.control1.x += cpOffsetX;
+      seg.control1.y += cpOffsetY;
+      lastSeg.control2.x -= cpOffsetX; // move this control point the opposite
+      lastSeg.control2.y -= cpOffsetY;
+
+      // scale control points in unison per endpoint -- this should probably be moved into a shape method
+      let cpScale = randomRangeFromArray(cpScaleRange);
+      let xDist = seg.control1.x - lastSeg.endPoint.x;
+      let yDist = seg.control1.y - lastSeg.endPoint.y;
+      seg.control1.x = lastSeg.endPoint.x + (xDist * cpScale);
+      seg.control1.y = lastSeg.endPoint.y + (yDist * cpScale);
+      xDist = lastSeg.control2.x - lastSeg.endPoint.x;
+      yDist = lastSeg.control2.y - lastSeg.endPoint.y;
+      lastSeg.control2.x = lastSeg.endPoint.x + (xDist * cpScale);
+      lastSeg.control2.y = lastSeg.endPoint.y + (yDist * cpScale);
+    }
+    
+    // move endpoints + attached control points together -- this should probably be moved into a shape method
+    let epOffsetX = randomRangeFromArray(epOffsetRangeX);
+    let epOffsetY = randomRangeFromArray(epOffsetRangeY);
+    let nextIndex = i+1;
+    if (nextIndex >= segs.length) {
+      if (shape.isClosed) {
+        nextIndex = 0;
+      } else {
+        break; // next seg doesn't exist -- should just break out of loop now
+      }
+    }
+    let nextSeg = segs[nextIndex];
+    seg.endPoint.x += epOffsetX;
+    seg.endPoint.y += epOffsetY;
+    seg.control2.x += epOffsetX;
+    seg.control2.y += epOffsetY;
+    nextSeg.control1.x += epOffsetX;
+    nextSeg.control1.y += epOffsetY;
+    
+    lastSeg = seg;
+  }
+  return shape;
+}
+
 export function generateCanvasEllipseShape(centerX, centerY, radiusX, radiusY, rotationRadians=0, drawingOptions={}) {
   let ellipseSegments = generateEllipseSegments(centerX, centerY, radiusX, radiusY);
-  let shape = new CanvasBezierShape(ellipseSegments, Object.assign({
+  let firstPoint = ellipseSegments[ellipseSegments.length-1].endPoint;
+  let shape = new CanvasBezierShape(firstPoint, ellipseSegments, Object.assign({
+    isClosed : true,
     isStroked : false,
     isFilled : true,
     fillStyle : 'black'
@@ -48,28 +111,43 @@ export function generateCanvasEllipseShape(centerX, centerY, radiusX, radiusY, r
 }
 
 export class CanvasBezierShape {
-  constructor(segments=[],options) {
+  constructor(startPoint=null, segments=[],options) {
     options = Object.assign({}, {
-      // closed : true, // currently we just assume it's closed
+      isClosed : true,
       isStroked : true,
       isFilled : true,
       strokeStyle : 'red',
       strokeWidth : 1,
       fillStyle : 'black'
     }, options);
+    this.startPoint = startPoint || new THREE.Vector2();
     this.segments = segments;
-    // this.closed = options.closed; // currently we just assume it's closed
+    this.isClosed = options.isClosed;
     this.isStroked = options.isStroked;
     this.isFilled = options.isFilled;
     this.strokeStyle = options.strokeStyle;
     this.strokeWidth = options.strokeWidth;
     this.fillStyle = options.fillStyle;
   }
+  clone() {
+    let startPoint = this.startPoint;
+    let segments = _.map(this.segments, (seg) => {return seg.clone()});
+    let options = {
+      isClosed : this.isClosed,
+      isStroked : this.isStroked,
+      isFilled : this.isFilled,
+      strokeStyle : this.strokeStyle,
+      strokeWidth : this.strokeWidth,
+      fillStyle : this.fillStyle
+    };
+      
+    return new CanvasBezierShape(startPoint, segments, options);
+  }
   addPathToCanvas(ctx) {
     const segments = this.segments;
-    const lastPoint = segments[segments.length-1].endPoint;
+    let startPoint = this.startPoint;
     ctx.beginPath();
-    ctx.moveTo(lastPoint.x, lastPoint.y);
+    ctx.moveTo(startPoint.x, startPoint.y);
     for (let i = 0; i < segments.length; i++) {
       segments[i].addPathToCanvas(ctx);
     }
@@ -78,7 +156,7 @@ export class CanvasBezierShape {
     this.addPathToCanvas(ctx);
     if (this.isStroked) {
       ctx.strokeStyle = this.strokeStyle;
-      ctx.strokeWidth = this.strokeWidth;
+      ctx.lineWidth = this.strokeWidth;
       ctx.stroke();
     }
     if (this.isFilled) {
@@ -146,6 +224,9 @@ export class CanvasBezierPathSegment {
     this.endPoint = new THREE.Vector2(x,y);
     this.control1 = new THREE.Vector2(cp1x,cp1y); // stretches from the previous point in the path
     this.control2 = new THREE.Vector2(cp2x,cp2y); // stretches to the endpoint
+  }
+  clone() {
+    return new CanvasBezierPathSegment(this.endPoint.x, this.endPoint.y, this.control1.x, this.control1.y, this.control2.x, this.control2.y);
   }
   addPathToCanvas(ctx) {
     let cp1 = this.control1;

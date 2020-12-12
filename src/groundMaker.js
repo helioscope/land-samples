@@ -4,9 +4,9 @@ import _ from 'lodash';
 import * as THREE from 'three';
 import SimplexNoise from 'simplex-noise';
 
-import {RADIANS_FOR_180_DEGREES, RADIANS_FOR_1_DEGREE, RADIANS_FOR_360_DEGREES, RADIANS_FOR_90_DEGREES, randomRange, randomRangeFromArray, randomRangeIntFromArray, remapValue, remapValueFromArrays} from './util';
+import {RADIANS_FOR_180_DEGREES, RADIANS_FOR_1_DEGREE, RADIANS_FOR_360_DEGREES, RADIANS_FOR_90_DEGREES, randomOdds, randomRange, randomRangeFromArray, randomRangeIntFromArray, remapValue, remapValueFromArrays} from './util';
 import {finalizeMesh, formPlaneBorder, USE_HARD_EDGE_LOWPOLY_STYLE} from './generatorUtil';
-import { generateCanvasEllipseShape } from './CanvasBezierShape';
+import { generateCanvasEllipseShape, jostleBezierPath, CanvasBezierShape, CanvasBezierPathSegment } from './CanvasBezierShape';
 
 
 let noiseSeed = new Date().toString();
@@ -68,6 +68,8 @@ const pathCPScaleRange = [0.8, 1.5]; // amount to scale bezier path control poin
 const pathCPOffsetRange = [-0.25, 0.25]; // amount to nudge bezier path control points (effectively tilting them along path point they're attached to), multiplied by axis size
 const pathEPJitterRange = [-0.3, 0.3]; // amount to nudge bezier path points (moving control points in unison), multiplied by axis size
 
+const riverOdds = 0.175;
+
 
 function sampleNoise(x, y) {
   return remapValue(simplex.noise2D(x, y), -1,1, 0,1);
@@ -98,7 +100,11 @@ function generateTexture(width, height) {
   c.fillRect(0, 0, width, height);
 
   generateNoiseTexture(width, height);
-  generateLakes(width, height);
+  if (randomOdds(riverOdds)) {
+    generateRiver(0, 0, width, height);
+  } else {
+    generateLakes(width, height);
+  }
   
   return heightmapContext.getImageData(0,0,width,height);
 }
@@ -266,6 +272,124 @@ function generateLakes(width, height) {
       c.fill();
     }
   }
+}
+
+function generateRiver(minX, minY, maxX, maxY) { // todo: pull out params (also make more things relatively scaled, e.g. offsets relative to thickness)
+  const ctx = heightmapContext;
+  let shape = generateRiverLine(minX, minY, maxX, maxY, 10);
+  shape.strokeStyle = "rgba(0,0,0,0.125)";
+  shape.drawToCanvas(ctx);
+  
+  let jostleParams = {
+    cpOffsetRangeX : [-4.5, 4.5],
+    cpOffsetRangeY : [-4.5, 4.5],
+    epOffsetRangeX : [-4, 4],
+    epOffsetRangeY : [-4, 4],
+    cpScaleRange : [0.8, 1.2]
+  };
+  
+  for (let i = 0; i < 6; i++) {
+    let jostledShape = shape.clone();
+    jostleBezierPath(jostledShape, jostleParams);
+    jostledShape.strokeWidth *= randomRange(0.5, 2);
+    jostledShape.drawToCanvas(ctx);
+  }
+  
+  jostleParams = {
+    cpOffsetRangeX : [-3, 3],
+    cpOffsetRangeY : [-3, 3],
+    epOffsetRangeX : [-3, 3],
+    epOffsetRangeY : [-3, 3],
+    cpScaleRange : [0.875, 1.125]
+  };
+  shape.strokeStyle = "rgba(0,0,0,0.5)"
+  for (let i = 0; i < 3; i++) {
+    let jostledShape = shape.clone();
+    jostleBezierPath(jostledShape, jostleParams);
+    jostledShape.strokeWidth *= randomRange(0.25, 0.8);
+    jostledShape.drawToCanvas(ctx);
+  }
+  
+  shape.strokeStyle = "rgba(0,0,0,0.9)";
+  shape.strokeWidth *= 0.8;
+  shape.drawToCanvas(ctx);
+}
+
+function generateRiverLine(rectMinX, rectMinY, rectMaxX, rectMaxY, extraEdgeDistance=0) {
+  let segs = [];
+  let points = [];
+  
+  let startX = rectMinX - extraEdgeDistance;
+  let startY = rectMinY - extraEdgeDistance;
+  let endX = 0;
+  let endY = 0;
+  
+  if (Math.random() > 0.5) {
+    startX = randomRange(0, rectMaxX);
+    endX = randomRange(0, rectMaxX)
+    endY = rectMaxY + extraEdgeDistance;
+  } else {
+    startY = randomRange(0, rectMaxY);
+    endY = randomRange(0, rectMaxY)
+    endX = rectMaxX + extraEdgeDistance;
+  }
+  
+  let start = new THREE.Vector2(startX, startY);
+  let distance = new THREE.Vector2(endX - startX, endY - startY);
+  
+  let segCount = randomRangeIntFromArray([2,4]);
+  let jitterDistance = [-15,15];
+
+  // for each seg, plot a point lerped between start and end, then offset by jitter distance
+  for (let i = 0; i < segCount; i++) {
+    let pos = start.clone();
+    pos.addScaledVector(distance, (i+1)/segCount);
+    if (i+1 < segCount) {
+      pos.x += randomRangeFromArray(jitterDistance);
+      pos.y += randomRangeFromArray(jitterDistance);
+    }
+    points.push(pos);
+  }
+
+  // after all points generated, add control points, calculated from points
+  // should probably extract this into a separate method for generating smoothed lines from point series
+  let lastSeg = null;
+  let lastSlope = new THREE.Vector2(0,0);
+  let lastPoint = start;
+  const cpScale = .6;
+  for (let i = 0; i < segCount; i++) {
+    let point = points[i];
+    let seg = new CanvasBezierPathSegment();
+    let slope;
+    let nextPoint = null;
+    let prevPointDist = point.clone().sub(lastPoint)
+    let cp1Pos = lastPoint.clone().add(lastSlope.clone().multiplyScalar(prevPointDist.length() * cpScale));
+    
+    seg.control1.copy(cp1Pos);
+    seg.endPoint.copy(point);
+    
+    if (i != segCount -1) {
+      nextPoint = points[i+1];
+      slope = nextPoint.clone().sub(lastPoint).normalize();
+      let cp2Pos = point.clone().sub(slope.clone().multiplyScalar(prevPointDist.length() * cpScale));
+      seg.control2.copy(cp2Pos);
+    } else {
+      seg.control2.copy(point);
+    }
+    segs.push(seg);
+    lastPoint = point
+    lastSeg = seg;
+    lastSlope = slope;
+  }
+  
+  let shape = new CanvasBezierShape(start, segs, {
+    isClosed : false,
+    isStroked : true,
+    isFilled : false,
+    strokeStyle : 'black',
+    strokeWidth : randomRange(5,7),
+  });
+  return shape;
 }
 
 function getColorForHeight(height) {
