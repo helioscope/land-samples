@@ -3,7 +3,7 @@
 import _ from 'lodash';
 import * as THREE from 'three';
 
-import {jitterVertices, randomRangeFromArray} from './util';
+import {jitterVertices, RADIANS_FOR_1_DEGREE, randomRangeFromArray} from './util';
 import {mushBottom, prepRandomSeed, USE_HARD_EDGE_LOWPOLY_STYLE} from './generatorUtil';
 import { MeshGenerator } from './MeshGenerator';
 
@@ -36,7 +36,8 @@ export const CumulousCloudMaker = new MeshGenerator({
     tuftZOffsetVariation : { value : [-0.125, 0.125], type: 'range'},
     bottomSmushRange : { value : [-0.55, -0.1], type: 'range'},
     jitterDistance : { value : 0.2 },
-    finalScale : { range : [0.7, 1] },
+    finalScale : { range : [0.6, 1] },
+    facing : { range : [-15 * RADIANS_FOR_1_DEGREE, 15 * RADIANS_FOR_1_DEGREE]},
     seed : { type : 'seed' }
   },
   generatorFunction : (params) => {
@@ -63,6 +64,7 @@ export const CumulousCloudMaker = new MeshGenerator({
     });
 
     geometry.scale(finalScale, finalScale, finalScale);
+    geometry.rotateY(params.facing);
 
     if (USE_HARD_EDGE_LOWPOLY_STYLE) {
       geometry.verticesNeedUpdate = true; // note: it seems like the original sphere normals are actually kinda nice if not pursuing a hard-edge style
