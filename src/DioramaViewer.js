@@ -43,6 +43,12 @@ function init() {
   downloadButton.onclick = onClickSaveImage;
   downloadButton.className = "download-button";
   buttonContainer.appendChild(downloadButton);
+
+  const randomizeButton = document.createElement('button');
+  randomizeButton.textContent = "randomize";
+  randomizeButton.onclick = onTriggerRandomize;
+  randomizeButton.className = "download-button";
+  buttonContainer.appendChild(randomizeButton);
   
   initDiorama(scene, renderer);
   generateFullDiorama();
@@ -65,7 +71,7 @@ function init() {
     const keyString = evt.key.toLowerCase();
     if (thisIsActive) {
       if (keyString == 'r') {
-        generateFullDiorama(getNewRandomSeed());
+        onTriggerRandomize();
       } else if (keyString == 'o') {
         orbitControls.reset();
       }
@@ -102,6 +108,20 @@ function onClickSaveImage() {
   // var img = document.createElement('img');
   // img.src = canvas.toDataURL();
   // rootElem.appendChild(img);
+}
+
+function onTriggerRandomize() {
+  generateFullDiorama(getNewRandomSeed());
+}
+
+function onOpenHelp() {
+  document.getElementById("help-overlay").classList.add("open");
+  document.getElementById("close-help-overlay-button").disabled = false;
+}
+
+function onCloseHelp() {
+  document.getElementById("help-overlay").classList.remove("open");
+  document.getElementById("close-help-overlay-button").disabled = true;
 }
 
 export default {

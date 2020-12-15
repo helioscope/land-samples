@@ -81,16 +81,16 @@ export function initDiorama(scene, renderer) {
   );
   dioramaGroup.add(sky);
 
-  let testColor = {
-    color: waterColor
-  };
+  // let testColor = {
+  //   color: waterColor
+  // };
 
-  let gui = new dat.GUI();
-  gui.addColor(testColor, 'color').onChange(()=>{
-    waterMaterial.color = new THREE.Color(testColor.color);
-  });
-  gui.add(waterMaterial, 'opacity',0,1);
-  gui.add(waterMaterial, 'shininess',0,255);
+  // let gui = new dat.GUI();
+  // gui.addColor(testColor, 'color').onChange(()=>{
+  //   waterMaterial.color = new THREE.Color(testColor.color);
+  // });
+  // gui.add(waterMaterial, 'opacity',0,1);
+  // gui.add(waterMaterial, 'shininess',0,255);
 }
 
 export function prepLighting(renderer) {
