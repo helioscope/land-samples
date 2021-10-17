@@ -4,7 +4,9 @@ blur shapes (e.g. for lakes) before adding them? use a separate canvas for the s
 
 cluster-spawn of flower, grass, or rock fields in diorama (use bitmap as stamp/mask, rather than just using the grid-spawn?) (bundle geometry into a single mesh?)
 
-rivers in ground-generator
+basic rivers in ground-generator
+- bezier path, draw, nudge (control?) points, draw again, repeat a few times (note: probably want to always nudge relative to original cp positions, so we don't end up with them walking away & not getting a proper furrow established)
+(could use the same trick for the lakes & islands, come to think, to make them a bit less aggressive in their silhouettes)
 
 convert to parametric (& deterministic) generators (+ use MeshGenerator)
 - groundmaker
@@ -117,6 +119,7 @@ Spawn behavior improvements:
 - restricted slope range
 - ability to skip spawn, rather than hiding it afterwards
 - split out grid-spawning code
+- islands / cluster smaller spawns around/within range of a larger spawn
 
 Noise texture improvements:
 - add/subtract raw value?
@@ -138,5 +141,7 @@ basic world-bits wrapper? (track/manage the parts that get updated/animated? + h
 basic sun-wrapper? (includes skybox bits (light + textured/vertex-colored inverted sphere? + methods to tweak the sun angle (and get appropriate colorations)))
 
 basic house generator?
+
+basic fence generator? (posts? stacked rocks?)
 
 basic editor for placing & editing things on the terrain from a top-down, ortho/2D perspective
